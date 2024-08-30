@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, Link } from 'react-router-dom';
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -25,8 +25,8 @@ const theme = createTheme({
 
 function UserLayout() {
   return (
-    <ThemeProvider theme={theme}>
-      <Router>
+    <BrowserRouter>
+      <ThemeProvider theme={theme}>
         <Box sx={{ display: 'flex' }}>
           <CssBaseline />
           <Drawer
@@ -116,8 +116,8 @@ function UserLayout() {
             </Routes>
           </Box>
         </Box>
-      </Router>
-    </ThemeProvider>
+      </ThemeProvider>
+    </BrowserRouter>
   );
 }
 
