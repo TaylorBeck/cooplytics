@@ -32,8 +32,8 @@ jobs:
 
       - name: Setup Application Insights
         run: |
-          npm install @azure/applicationinsights-web
-          echo "import { ApplicationInsights } from '@azure/applicationinsights-web'; const appInsights = new ApplicationInsights({ config: { connectionString: '${{ secrets.APPINSIGHTS_CONNECTION_STRING }}' } }); appInsights.loadAppInsights(); appInsights.trackPageView();" >> src/index.js
+          npm install @microsoft/applicationinsights-web
+          echo "import { ApplicationInsights } from '@microsoft/applicationinsights-web'; const appInsights = new ApplicationInsights({ config: { connectionString: '${{ secrets.APPINSIGHTS_CONNECTION_STRING }}' } }); appInsights.loadAppInsights(); appInsights.trackPageView();" >> src/index.js
 
       - name: Azure Login
         uses: azure/login@v1
