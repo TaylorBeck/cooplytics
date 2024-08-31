@@ -1,67 +1,55 @@
-import { useMutation } from '@tanstack/react-query';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from './firebaseConfig';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-const createUserFn = async userData => {
-  const { email, password, name, role } = userData;
-  const response = await fetch(`${API_URL}/auth/register`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ email, password, name, role })
-  });
+export const createUser = async userData => {
+  try {
+    const response = await fetch(`${API_URL}/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(userData)
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to register user');
-  }
-
-  return response.json();
-};
-
-export const useCreateUser = () => {
-  return useMutation({
-    mutationFn: createUserFn,
-    onError: error => {
-      console.error('Error creating user:', error.message);
+    if (!response.ok) {
+      throw new Error('Failed to create user');
     }
-  });
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating user:', error);
+    throw error;
+  }
 };
 
-const loginUserFn = async credentials => {
+export const loginUser = async credentials => {
   const { email, password } = credentials;
-  const userCredential = await signInWithEmailAndPassword(
-    auth,
-    email,
-    password
-  );
-  const idToken = await userCredential.user.getIdToken();
+  try {
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    const idToken = await userCredential.user.getIdToken();
 
-  const response = await fetch(`${API_URL}/auth/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ idToken })
-  });
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ idToken })
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to login');
-  }
-
-  const data = await response.json();
-  return data.user;
-};
-
-export const useLoginUser = () => {
-  return useMutation({
-    mutationFn: loginUserFn,
-    onError: error => {
-      console.error('Error logging in:', error.message);
+    if (!response.ok) {
+      throw new Error('Failed to login');
     }
-  });
+
+    const userData = await response.json();
+    return { user: userData.user, idToken };
+  } catch (error) {
+    console.error('Error logging in:', error);
+    throw error;
+  }
 };
