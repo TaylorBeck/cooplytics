@@ -1,28 +1,50 @@
 import { Provider } from 'react-redux';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { store } from './redux/store';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
-import SignUp from './containers/SignUp';
-import UserLayout from './components/layout/UserLayout';
-
-// Create a Tanstack query client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      retry: 2
-    }
-  }
-});
-
-const user = null;
+import SignUp from './pages/SignUp';
+import SignIn from './pages/SignIn';
+import Dashboard from './pages/Dashboard';
+import ChickensPage from './pages/ChickensPage';
+import FinancesPage from './pages/FinancesPage';
+import SettingsPage from './pages/SettingsPage';
 
 function App() {
   return (
     <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        {user ? <UserLayout /> : <SignUp />}
-      </QueryClientProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path="/sign-up"
+            element={<SignUp />}
+          />
+          <Route
+            path="/sign-in"
+            element={<SignIn />}
+          />
+          <Route
+            path="/dashboard/"
+            element={<Dashboard />}
+          />
+          <Route
+            path="/chickens"
+            element={<ChickensPage />}
+          />
+          <Route
+            path="/finances"
+            element={<FinancesPage />}
+          />
+          <Route
+            path="/settings"
+            element={<SettingsPage />}
+          />
+          {/* Default route */}
+          <Route
+            path="/"
+            element={<SignIn />}
+          />{' '}
+        </Routes>
+      </BrowserRouter>
     </Provider>
   );
 }
