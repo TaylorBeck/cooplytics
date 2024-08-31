@@ -1,0 +1,106 @@
+name: Deploy React App to Azure
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'poultrypro-frontend'
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_FRONTEND }}
+          package: dist
+
+      - name: Setup Application Insights
+        run: |
+          npm install @azure/applicationinsights-web
+          echo "import { ApplicationInsights } from '@azure/applicationinsights-web'; const appInsights = new ApplicationInsights({ config: { connectionString: '${{ secrets.APPINSIGHTS_CONNECTION_STRING }}' } }); appInsights.loadAppInsights(); appInsights.trackPageView();" >> src/index.js
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get secrets from Azure Key Vault
+        uses: azure/get-keyvault-secrets@v1
+        with:
+          keyvault: 'PoultryProVault'
+          secrets: 'FIREBASE-CONFIG'
+        id: myGetSecretAction
+
+      - name: Set Web App Settings
+        uses: azure/appservice-settings@v1
+        with:
+          app-name: 'poultrypro-frontend'
+          app-settings-json: |
+            [
+              {
+                "name": "VITE_FIREBASE_API_KEY",
+                "value": "${{ steps.myGetSecretAction.outputs.FIREBASE-API-KEY }}"
+              },
+              {
+                "name": "VITE_FIREBASE_AUTH_DOMAIN",
+                "value": "${{ steps.myGetSecretAction.outputs.FIREBASE-AUTH-DOMAIN }}"
+              },
+              {
+                "name": "VITE_FIREBASE_DATABASE_URL",
+                "value": "${{ steps.myGetSecretAction.outputs.FIREBASE-DATABASE-URL }}"
+              },
+              {
+                "name": "VITE_FIREBASE_PROJECT_ID",
+                "value": "${{ steps.myGetSecretAction.outputs.FIREBASE-PROJECT-ID }}"
+              },
+              {
+                "name": "VITE_FIREBASE_STORAGE_BUCKET",
+                "value": "${{ steps.myGetSecretAction.outputs.FIREBASE-STORAGE-BUCKET }}"
+              },
+              {
+                "name": "VITE_FIREBASE_MESSAGING_SENDER_ID",
+                "value": "${{ steps.myGetSecretAction.outputs.FIREBASE-MESSAGING-SENDER-ID }}"
+              },
+              {
+                "name": "VITE_FIREBASE_APP_ID",
+                "value": "${{ steps.myGetSecretAction.outputs.FIREBASE-APP-ID }}"
+              },
+              {
+                "name": "VITE_FIREBASE_MEASUREMENT_ID",
+                "value": "${{ steps.myGetSecretAction.outputs.FIREBASE-MEASUREMENT-ID }}"
+              },
+              {
+                "name": "VITE_API_URL",
+                "value": "${{ steps.myGetSecretAction.outputs.API-URL }}"
+              },
+              {
+                "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                "value": "${{ secrets.APPINSIGHTS-CONNECTION-STRING }}"
+              }
+            ]
+
+      - name: Check App Service Plan
+        run: |
+          az appservice plan show --name PoultryProPlan --resource-group PoultryProRG --query "{sku:sku.name, capacity:sku.capacity}"
+
+      - name: Check Autoscale Settings
+        run: |
+          autoscale_settings=$(az monitor autoscale show --resource-group PoultryProRG --name autoscale-poultrypro)
+          echo "Current Autoscale Configuration:"
+          echo $autoscale_settings | jq .
