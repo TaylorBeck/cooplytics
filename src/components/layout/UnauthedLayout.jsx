@@ -9,12 +9,21 @@ import {
 import Slide from '@mui/material/Slide';
 import { styled } from '@mui/material/styles';
 
-const StyledPaper = styled('div')(({ theme }) => ({
+const StyledContainer = styled(Container)(({ theme }) => ({
   display: 'flex',
-  flexDirection: 'column',
   justifyContent: 'center',
   alignItems: 'center',
   minHeight: '100vh'
+}));
+
+const StyledPaper = styled('div')(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  padding: theme.spacing(3),
+  borderRadius: '8px',
+  backgroundColor: 'white',
+  boxShadow: theme.shadows[2]
 }));
 
 const StyledAvatar = styled(Avatar)(({ theme }) => ({
@@ -36,8 +45,8 @@ export default function UnauthedLayout({
   closeSnackbar
 }) {
   return (
-    <>
-      <Container
+    <div className="auth-background">
+      <StyledContainer
         component="main"
         maxWidth="xs"
       >
@@ -55,7 +64,7 @@ export default function UnauthedLayout({
           </Typography>
           <StyledForm noValidate>{children}</StyledForm>
         </StyledPaper>
-      </Container>
+      </StyledContainer>
       <Snackbar
         open={snackbarProps.open}
         autoHideDuration={6000}
@@ -72,6 +81,6 @@ export default function UnauthedLayout({
           {snackbarProps.message}
         </Alert>
       </Snackbar>
-    </>
+    </div>
   );
 }

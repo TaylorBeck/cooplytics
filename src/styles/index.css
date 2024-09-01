@@ -31,6 +31,14 @@ h1 {
   line-height: 1.1;
 }
 
+.auth-background {
+  background-image: url('https://s3-taylor-inventorymanagement.s3.us-west-2.amazonaws.com/background-min.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
