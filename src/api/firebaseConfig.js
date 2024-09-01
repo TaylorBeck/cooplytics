@@ -1,8 +1,11 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
-console.log('=> Logging environment variables');
-console.log(import.meta.env);
+console.log('=> Start logging environment variables');
+console.log('All environment variables:', import.meta.env);
+Object.keys(import.meta.env).forEach(key => {
+  console.log(`${key}: ${import.meta.env[key]}`);
+});
 console.log('=> End logging environment variables');
 
 export const firebaseConfig = {
