@@ -26,8 +26,8 @@ jobs:
       - name: List build output
         run: ls -R dist
 
-      - name: Copy web.config
-        run: cp web.config dist/
+      - name: Copy server.js to dist
+        run: cp server.js dist/
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
