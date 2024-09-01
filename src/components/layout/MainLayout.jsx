@@ -211,7 +211,7 @@ export default function Dashboard({ children }) {
               alt="PoultryPro Logo"
               sx={{
                 marginRight: open ? '16px' : 'auto',
-                marginLeft: open ? '' : 'auto'
+                marginLeft: open ? '10px' : 'auto'
               }}
             />
             {open && (

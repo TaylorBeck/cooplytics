@@ -51,7 +51,7 @@ export default function SignIn() {
       // Navigate to dashboard after 1.5 seconds
       setTimeout(() => {
         navigate('/dashboard');
-      }, 1500);
+      }, 1000);
     } catch (error) {
       dispatch(loginFailure(error.message || 'Failed to sign in'));
       setSnackbarProps({

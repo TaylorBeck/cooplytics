@@ -108,7 +108,15 @@ export default function Dashboard() {
               >
                 <LineChart data={eggProductionData}>
                   <XAxis dataKey="month" />
-                  <YAxis />
+                  <YAxis
+                    width={40}
+                    tickCount={5}
+                    tickFormatter={false}
+                    label={false}
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={10}
+                  />
                   <Tooltip />
                   <Line
                     type="monotone"
@@ -149,7 +157,10 @@ export default function Dashboard() {
               >
                 <BarChart data={weightDistributionData}>
                   <XAxis dataKey="weight" />
-                  <YAxis />
+                  <YAxis
+                    width={40}
+                    tickCount={5}
+                  />
                   <Tooltip />
                   <Bar
                     dataKey="count"
