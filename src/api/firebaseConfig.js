@@ -1,13 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
-console.log('=> Start logging environment variables');
-console.log('All environment variables:', import.meta.env);
-Object.keys(import.meta.env).forEach(key => {
-  console.log(`${key}: ${import.meta.env[key]}`);
-});
-console.log('=> End logging environment variables');
-
 export const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
