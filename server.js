@@ -1,9 +1,6 @@
 const express = require('express');
 const path = require('path');
 
-// Get the current directory
-const __dirname = path.resolve();
-
 const app = express();
 const port = process.env.PORT || 8080;
 
