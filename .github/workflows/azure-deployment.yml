@@ -23,6 +23,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: List build output
+        run: ls -R dist
+
+      - name: Copy web.config
+        run: cp web.config dist/
+
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
