@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && cp server.js dist/",
     "lint": "eslint .",
     "preview": "vite preview",
     "start": "node server.js"
