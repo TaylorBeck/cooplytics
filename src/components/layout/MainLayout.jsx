@@ -1,38 +1,42 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../redux/slices/authSlice';
+import { persistor } from '../../redux/store';
+import { auth } from '../../api/firebaseConfig';
+
 import {
-  styled,
-  createTheme,
-  useTheme,
-  ThemeProvider
-} from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import Box from '@mui/material/Box';
-import MuiAppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
+  CssBaseline,
+  Box,
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Container,
+  Grid,
+  Avatar,
+  Popover,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Drawer
+} from '@mui/material';
+
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import Avatar from '@mui/material/Avatar';
-import Popover from '@mui/material/Popover';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Divider from '@mui/material/Divider';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AgricultureIcon from '@mui/icons-material/Agriculture';
 import PetsIcon from '@mui/icons-material/Pets';
 import EggIcon from '@mui/icons-material/Egg';
 import LocalDiningIcon from '@mui/icons-material/LocalDining';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import CalendarIcon from '@mui/icons-material/CalendarMonth';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
-import MuiDrawer from '@mui/material/Drawer';
-import useMediaQuery from '@mui/material/useMediaQuery';
 
 const drawerWidth = 200;
 const closedDrawerWidth = 59;
@@ -51,7 +55,7 @@ const theme = createTheme({
   }
 });
 
-const AppBar = styled(MuiAppBar, {
+const StyledAppBar = styled(AppBar, {
   shouldForwardProp: prop => prop !== 'open'
 })(({ theme, open }) => ({
   zIndex: theme.zIndex.drawer + 1,
@@ -72,7 +76,7 @@ const AppBar = styled(MuiAppBar, {
   })
 }));
 
-const Drawer = styled(MuiDrawer, {
+const StyledDrawer = styled(Drawer, {
   shouldForwardProp: prop => prop !== 'open'
 })(({ theme, open }) => ({
   '& .MuiDrawer-paper': {
@@ -104,7 +108,8 @@ const menuItems = [
   { text: 'Breeder', icon: <PetsIcon />, path: '/breeder' },
   { text: 'Hatchery', icon: <EggIcon />, path: '/hatchery' },
   { text: 'Feed Mill', icon: <LocalDiningIcon />, path: '/feed-mill' },
-  { text: 'Finances', icon: <AttachMoneyIcon />, path: '/finances' }
+  { text: 'Finances', icon: <AttachMoneyIcon />, path: '/finances' },
+  { text: 'Calendar', icon: <CalendarIcon />, path: '/calendar' }
 ];
 
 const Logo = styled('img')({
@@ -133,6 +138,7 @@ const MainContent = styled(Box, {
 
 export default function Dashboard({ children }) {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [open, setOpen] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
@@ -159,11 +165,18 @@ export default function Dashboard({ children }) {
 
   const popoverOpen = Boolean(anchorEl);
 
+  const handleLogout = async () => {
+    await auth.signOut(); // Sign out from Firebase
+    dispatch(logout()); // Dispatch the logout action
+    persistor.purge(); // Clear persisted store data
+    navigate('/sign-in'); // Navigate to sign-in page
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-        <AppBar
+        <StyledAppBar
           position="fixed"
           open={open}
         >
@@ -193,8 +206,8 @@ export default function Dashboard({ children }) {
               Dashboard
             </Typography>
           </Toolbar>
-        </AppBar>
-        <Drawer
+        </StyledAppBar>
+        <StyledDrawer
           variant="permanent"
           open={open}
         >
@@ -229,7 +242,7 @@ export default function Dashboard({ children }) {
           <List component="nav">
             {menuItems.map(item => (
               <ListItem
-                button
+                button={'true'}
                 key={item.text}
                 onClick={() => navigate(item.path)}
                 sx={{
@@ -287,13 +300,29 @@ export default function Dashboard({ children }) {
               }}
             >
               <List>
-                <ListItem button>
+                <ListItem
+                  button={'true'}
+                  onClick={() => navigate('/settings')}
+                  sx={{
+                    '&:hover': {
+                      cursor: 'pointer'
+                    }
+                  }}
+                >
                   <ListItemIcon>
                     <SettingsIcon />
                   </ListItemIcon>
                   <ListItemText primary="Settings" />
                 </ListItem>
-                <ListItem button>
+                <ListItem
+                  button={'true'}
+                  onClick={handleLogout}
+                  sx={{
+                    '&:hover': {
+                      cursor: 'pointer'
+                    }
+                  }}
+                >
                   <ListItemIcon>
                     <LogoutIcon />
                   </ListItemIcon>
@@ -302,7 +331,7 @@ export default function Dashboard({ children }) {
               </List>
             </Popover>
           </Box>
-        </Drawer>
+        </StyledDrawer>
         <MainContent open={open}>
           <Toolbar />
           <Container

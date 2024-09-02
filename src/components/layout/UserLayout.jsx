@@ -73,7 +73,7 @@ function UserLayout() {
                 }
               ].map(item => (
                 <ListItem
-                  button
+                  button={'true'}
                   key={item.text}
                   component={Link}
                   to={item.path}

@@ -1,19 +1,36 @@
 import MainLayout from '../components/layout/MainLayout';
-import { Container, Grid, Paper, Typography } from '@mui/material';
 import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  XAxis,
-  YAxis,
-  // CartesianGrid,
+  Container,
+  Grid,
+  Paper,
+  Typography,
+  useMediaQuery
+} from '@mui/material';
+import { Line, Bar, Pie } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
   Tooltip,
-  ResponsiveContainer,
-  Cell
-} from 'recharts';
+  Legend
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 // Data for charts
 const eggProductionData = [
@@ -69,6 +86,39 @@ const waterConsumptionData = [
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 export default function Dashboard() {
+  const isSmallScreen = useMediaQuery('(max-width:899px)');
+
+  // Chart configurations
+  const lineChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true
+      }
+    }
+  };
+
+  const barChartOptions = {
+    ...lineChartOptions,
+    indexAxis: 'x'
+  };
+
+  const pieChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'right'
+      }
+    }
+  };
+
   return (
     <MainLayout>
       <Container
@@ -83,15 +133,16 @@ export default function Dashboard() {
           <Grid
             item
             xs={12}
-            md={6}
-            lg={4}
+            sm={6}
+            md={4}
           >
             <Paper
               sx={{
                 p: 2,
                 display: 'flex',
                 flexDirection: 'column',
-                height: 240
+                height: 240,
+                paddingBottom: 6
               }}
             >
               <Typography
@@ -102,45 +153,36 @@ export default function Dashboard() {
               >
                 Egg Production
               </Typography>
-              <ResponsiveContainer
-                width="100%"
-                height="100%"
-              >
-                <LineChart data={eggProductionData}>
-                  <XAxis dataKey="month" />
-                  <YAxis
-                    width={40}
-                    tickCount={5}
-                    tickFormatter={false}
-                    label={false}
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={10}
-                  />
-                  <Tooltip />
-                  <Line
-                    type="monotone"
-                    dataKey="eggs"
-                    stroke="#8884d8"
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              <Line
+                options={lineChartOptions}
+                data={{
+                  labels: eggProductionData.map(d => d.month),
+                  datasets: [
+                    {
+                      data: eggProductionData.map(d => d.eggs),
+                      borderColor: '#8884d8',
+                      backgroundColor: 'rgba(136, 132, 216, 0.5)'
+                    }
+                  ]
+                }}
+              />
             </Paper>
           </Grid>
+
           {/* Weight Distribution */}
           <Grid
             item
             xs={12}
-            md={6}
-            lg={4}
+            sm={6}
+            md={4}
           >
             <Paper
               sx={{
                 p: 2,
                 display: 'flex',
                 flexDirection: 'column',
-                height: 240
+                height: 240,
+                paddingBottom: 6
               }}
             >
               <Typography
@@ -151,45 +193,35 @@ export default function Dashboard() {
               >
                 Weight Distribution
               </Typography>
-              <ResponsiveContainer
-                width="100%"
-                height="100%"
-              >
-                <BarChart data={weightDistributionData}>
-                  <XAxis dataKey="weight" />
-                  <YAxis
-                    width={40}
-                    tickCount={5}
-                  />
-                  <Tooltip />
-                  <Bar
-                    dataKey="count"
-                    fill="#82ca9d"
-                  >
-                    {weightDistributionData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <Bar
+                options={barChartOptions}
+                data={{
+                  labels: weightDistributionData.map(d => d.weight),
+                  datasets: [
+                    {
+                      data: weightDistributionData.map(d => d.count),
+                      backgroundColor: COLORS
+                    }
+                  ]
+                }}
+              />
             </Paper>
           </Grid>
+
           {/* Feed Consumption */}
           <Grid
             item
             xs={12}
-            md={6}
-            lg={4}
+            sm={6}
+            md={4}
           >
             <Paper
               sx={{
                 p: 2,
                 display: 'flex',
                 flexDirection: 'column',
-                height: 240
+                height: 240,
+                paddingBottom: 6
               }}
             >
               <Typography
@@ -200,35 +232,35 @@ export default function Dashboard() {
               >
                 Feed Consumption
               </Typography>
-              <ResponsiveContainer
-                width="100%"
-                height="100%"
-              >
-                <BarChart data={feedConsumptionData}>
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar
-                    dataKey="amount"
-                    fill="#ffc658"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+              <Bar
+                options={barChartOptions}
+                data={{
+                  labels: feedConsumptionData.map(d => d.day),
+                  datasets: [
+                    {
+                      data: feedConsumptionData.map(d => d.amount),
+                      backgroundColor: '#ffc658'
+                    }
+                  ]
+                }}
+              />
             </Paper>
           </Grid>
+
           {/* Health Status */}
           <Grid
             item
             xs={12}
-            md={6}
-            lg={4}
+            sm={6}
+            md={4}
           >
             <Paper
               sx={{
                 p: 2,
                 display: 'flex',
                 flexDirection: 'column',
-                height: 240
+                height: 240,
+                paddingBottom: 6
               }}
             >
               <Typography
@@ -239,46 +271,35 @@ export default function Dashboard() {
               >
                 Health Status
               </Typography>
-              <ResponsiveContainer
-                width="100%"
-                height="100%"
-              >
-                <PieChart>
-                  <Pie
-                    data={healthStatusData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    fill="#8884d8"
-                    label
-                  >
-                    {healthStatusData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
+              <Pie
+                options={pieChartOptions}
+                data={{
+                  labels: healthStatusData.map(d => d.name),
+                  datasets: [
+                    {
+                      data: healthStatusData.map(d => d.value),
+                      backgroundColor: COLORS
+                    }
+                  ]
+                }}
+              />
             </Paper>
           </Grid>
+
           {/* Temperature */}
           <Grid
             item
             xs={12}
-            md={6}
-            lg={4}
+            sm={6}
+            md={4}
           >
             <Paper
               sx={{
                 p: 2,
                 display: 'flex',
                 flexDirection: 'column',
-                height: 240
+                height: 240,
+                paddingBottom: 6
               }}
             >
               <Typography
@@ -289,37 +310,36 @@ export default function Dashboard() {
               >
                 Temperature
               </Typography>
-              <ResponsiveContainer
-                width="100%"
-                height="100%"
-              >
-                <LineChart data={temperatureData}>
-                  <XAxis dataKey="time" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line
-                    type="monotone"
-                    dataKey="temp"
-                    stroke="#ff7300"
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              <Line
+                options={lineChartOptions}
+                data={{
+                  labels: temperatureData.map(d => d.time),
+                  datasets: [
+                    {
+                      data: temperatureData.map(d => d.temp),
+                      borderColor: '#ff7300',
+                      backgroundColor: 'rgba(255, 115, 0, 0.5)'
+                    }
+                  ]
+                }}
+              />
             </Paper>
           </Grid>
+
           {/* Water Consumption */}
           <Grid
             item
             xs={12}
-            md={6}
-            lg={4}
+            sm={6}
+            md={4}
           >
             <Paper
               sx={{
                 p: 2,
                 display: 'flex',
                 flexDirection: 'column',
-                height: 240
+                height: 240,
+                paddingBottom: 6
               }}
             >
               <Typography
@@ -330,20 +350,18 @@ export default function Dashboard() {
               >
                 Water Consumption
               </Typography>
-              <ResponsiveContainer
-                width="100%"
-                height="100%"
-              >
-                <BarChart data={waterConsumptionData}>
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar
-                    dataKey="liters"
-                    fill="#3b82f6"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+              <Bar
+                options={barChartOptions}
+                data={{
+                  labels: waterConsumptionData.map(d => d.month),
+                  datasets: [
+                    {
+                      data: waterConsumptionData.map(d => d.liters),
+                      backgroundColor: '#3b82f6'
+                    }
+                  ]
+                }}
+              />
             </Paper>
           </Grid>
         </Grid>
