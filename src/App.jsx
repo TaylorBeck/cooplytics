@@ -1,9 +1,8 @@
 import React, { Suspense, lazy } from 'react';
 import { Provider } from 'react-redux';
-import { store } from './redux/store';
+import { store, persistor } from './redux/store';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { Navigate, Outlet } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
 
 // Lazy load components
 const SignUp = lazy(() => import('./pages/SignUp'));
@@ -16,53 +15,83 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const PrivateRoute = lazy(() => import('./components/PrivateRoute'));
 
 // Loading component
-const Loading = () => <div>Loading...</div>;
+const Loading = () => (
+  <div style={spinnerStyles.spinnerContainer}>
+    <div style={spinnerStyles.spinner}></div>
+  </div>
+);
+
+const spinnerStyles = {
+  spinnerContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh'
+  },
+  spinner: {
+    border: '16px solid #f3f3f3',
+    borderTop: '16px solid #3498db',
+    borderRadius: '50%',
+    width: '120px',
+    height: '120px',
+    animation: 'spin 2s linear infinite'
+  }
+};
 
 function App() {
   return (
     <Provider store={store}>
-      <BrowserRouter>
-        <Suspense fallback={<Loading />}>
-          <Routes>
-            <Route
-              path="/sign-up"
-              element={<SignUp />}
-            />
-            <Route
-              path="/sign-in"
-              element={<SignIn />}
-            />
-            <Route
-              path="/"
-              element={<SignIn />}
-            />
+      <PersistGate
+        loading={null}
+        persistor={persistor}
+      >
+        <BrowserRouter>
+          <Suspense fallback={<Loading />}>
+            <Routes>
+              <Route
+                path="/sign-up"
+                element={<SignUp />}
+              />
+              <Route
+                path="/sign-in"
+                element={<SignIn />}
+              />
+              <Route
+                path="/"
+                element={<SignIn />}
+              />
 
-            <Route element={<PrivateRoute />}>
-              <Route
-                path="/dashboard"
-                element={<Dashboard />}
-              />
-              <Route
-                path="/chickens"
-                element={<ChickensPage />}
-              />
-              <Route
-                path="/finances"
-                element={<FinancesPage />}
-              />
-              <Route
-                path="/settings"
-                element={<SettingsPage />}
-              />
-            </Route>
+              <Route element={<PrivateRoute />}>
+                <Route
+                  path="/dashboard"
+                  element={<Dashboard />}
+                />
+                <Route
+                  path="/chickens"
+                  element={<ChickensPage />}
+                />
+                <Route
+                  path="/finances"
+                  element={<FinancesPage />}
+                />
+                <Route
+                  path="/settings"
+                  element={<SettingsPage />}
+                />
+                <Route
+                  path="/calendar"
+                  element={<SettingsPage />}
+                />
+              </Route>
 
-            <Route
-              path="*"
-              element={<NotFound />}
-            />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
+              <Route
+                path="*"
+                element={<NotFound />}
+              />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </PersistGate>
     </Provider>
   );
 }
