@@ -29,17 +29,25 @@ const authSlice = createSlice({
     },
     logout: state => {
       state.user = null;
+      state.idToken = null; // Clear idToken
       state.isAuthenticated = false;
       state.loading = false;
       state.error = null;
     },
     clearError: state => {
       state.error = null;
-    }
+    },
+    reset: state => initialState // Add reset action
   }
 });
 
-export const { loginStart, loginSuccess, loginFailure, logout, clearError } =
-  authSlice.actions;
+export const {
+  loginStart,
+  loginSuccess,
+  loginFailure,
+  logout,
+  clearError,
+  reset
+} = authSlice.actions;
 
 export default authSlice.reducer;
