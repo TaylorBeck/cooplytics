@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../redux/slices/authSlice';
 import { persistor } from '../../redux/store';
 import { auth } from '../../api/firebaseConfig';
@@ -23,7 +23,8 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
-  Drawer
+  Drawer,
+  ListItemAvatar
 } from '@mui/material';
 
 import MenuIcon from '@mui/icons-material/Menu';
@@ -32,16 +33,39 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import AgricultureIcon from '@mui/icons-material/Agriculture';
 import PetsIcon from '@mui/icons-material/Pets';
 import EggIcon from '@mui/icons-material/Egg';
+import WarehouseIcon from '@mui/icons-material/Warehouse';
 import LocalDiningIcon from '@mui/icons-material/LocalDining';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CalendarIcon from '@mui/icons-material/CalendarMonth';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import Badge from '@mui/material/Badge';
+import WarningIcon from '@mui/icons-material/Warning';
+import InfoIcon from '@mui/icons-material/Info';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
 
 const drawerWidth = 200;
 const closedDrawerWidth = 59;
 
 const theme = createTheme({
+  typography: {
+    fontFamily: [
+      'Roboto',
+      '-apple-system',
+      'BlinkMacSystemFont',
+      '"Segoe UI"',
+      'Arial',
+      'sans-serif'
+    ].join(',')
+  },
   palette: {
     primary: {
       main: '#003049' // prussian_blue
@@ -61,7 +85,7 @@ const StyledAppBar = styled(AppBar, {
   zIndex: theme.zIndex.drawer + 1,
   width: `calc(100% - ${closedDrawerWidth + 12}px)`,
   marginLeft: closedDrawerWidth,
-  backgroundColor: theme.palette.primary.main, // Add this line
+  backgroundColor: theme.palette.primary.main,
   transition: theme.transitions.create(['width', 'margin'], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen
@@ -104,12 +128,14 @@ const StyledDrawer = styled(Drawer, {
 
 const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-  { text: 'Farms', icon: <AgricultureIcon />, path: '/chickens' },
+  { text: 'Farms', icon: <AgricultureIcon />, path: '/farms' },
+  { text: 'Chickens', icon: <WarehouseIcon />, path: '/chickens' },
   { text: 'Breeder', icon: <PetsIcon />, path: '/breeder' },
   { text: 'Hatchery', icon: <EggIcon />, path: '/hatchery' },
   { text: 'Feed Mill', icon: <LocalDiningIcon />, path: '/feed-mill' },
   { text: 'Finances', icon: <AttachMoneyIcon />, path: '/finances' },
-  { text: 'Calendar', icon: <CalendarIcon />, path: '/calendar' }
+  { text: 'Calendar', icon: <CalendarIcon />, path: '/calendar' },
+  { text: 'Orders', icon: <ShoppingCartIcon />, path: '/orders' }
 ];
 
 const Logo = styled('img')({
@@ -136,12 +162,14 @@ const MainContent = styled(Box, {
   })
 }));
 
-export default function Dashboard({ children }) {
+export default function Dashboard({ children, title }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const user = useSelector(state => state.auth.user);
   const [open, setOpen] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   useEffect(() => {
     if (isSmallScreen) {
@@ -170,6 +198,64 @@ export default function Dashboard({ children }) {
     dispatch(logout()); // Dispatch the logout action
     persistor.purge(); // Clear persisted store data
     navigate('/sign-in'); // Navigate to sign-in page
+  };
+
+  const toggleNotifications = () => {
+    setNotificationsOpen(!notificationsOpen);
+  };
+
+  const notifications = [
+    {
+      id: 1,
+      type: 'warning',
+      message: 'Low feed stock in Coop #3',
+      time: '2 hours ago'
+    },
+    {
+      id: 2,
+      type: 'info',
+      message: 'Egg collection due for Coop #1',
+      time: '3 hours ago'
+    },
+    {
+      id: 3,
+      type: 'success',
+      message: 'Vaccinations completed',
+      time: '1 day ago'
+    },
+    {
+      id: 4,
+      type: 'warning',
+      message: 'Unusual temperatures - Coop 1',
+      time: '2 days ago'
+    },
+    {
+      id: 5,
+      type: 'info',
+      message: 'Order #124983 received',
+      time: '3 days ago'
+    },
+    {
+      id: 6,
+      type: 'danger',
+      message: 'Disease outbreak in Coop #2',
+      time: '3 days ago'
+    }
+  ];
+
+  const getNotificationIcon = type => {
+    switch (type) {
+      case 'warning':
+        return <WarningIcon sx={{ color: 'orange' }} />;
+      case 'info':
+        return <InfoIcon sx={{ color: 'blue' }} />;
+      case 'success':
+        return <CheckCircleIcon sx={{ color: 'green' }} />;
+      case 'danger':
+        return <ErrorIcon sx={{ color: 'red' }} />;
+      default:
+        return <InfoIcon />;
+    }
   };
 
   return (
@@ -203,8 +289,19 @@ export default function Dashboard({ children }) {
               noWrap
               sx={{ flexGrow: 1 }}
             >
-              Dashboard
+              {title}
             </Typography>
+            <IconButton
+              color="inherit"
+              onClick={toggleNotifications}
+            >
+              <Badge
+                badgeContent={4}
+                color="secondary"
+              >
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
           </Toolbar>
         </StyledAppBar>
         <StyledDrawer
@@ -273,17 +370,30 @@ export default function Dashboard({ children }) {
               </ListItem>
             ))}
           </List>
-          <Box sx={{ position: 'absolute', bottom: 0, width: '100%', p: 2 }}>
+          <Box
+            sx={{
+              bottom: 0,
+              width: '100%',
+              p: 2,
+              display: 'flex',
+              height: '100%',
+              alignItems: 'flex-end',
+              justifyContent: 'center'
+            }}
+          >
             <IconButton
               onClick={handlePopoverOpen}
-              sx={{ marginLeft: '0', padding: '0' }}
+              sx={{
+                marginLeft: '0',
+                padding: '0'
+              }}
             >
               <Avatar
                 alt="User Avatar"
-                src="/face-1.png"
-                sx={{
-                  boxShadow: '0px 0px 10px 0px rgba(0, 0, 0, 0.1)'
-                }}
+                src={
+                  user?.image ||
+                  'https://s3-poultrypro.s3.us-west-2.amazonaws.com/face-1.png'
+                }
               />
             </IconButton>
             <Popover
@@ -332,11 +442,55 @@ export default function Dashboard({ children }) {
             </Popover>
           </Box>
         </StyledDrawer>
+        <Drawer
+          anchor="right"
+          open={notificationsOpen}
+          onClose={toggleNotifications}
+          sx={{
+            '& .MuiDrawer-paper': {
+              width: 350,
+              boxSizing: 'border-box'
+            }
+          }}
+        >
+          <Box sx={{ p: 2 }}>
+            <Typography
+              variant="h6"
+              gutterBottom
+            >
+              Notifications
+            </Typography>
+            <List>
+              {notifications.map(notification => (
+                <>
+                  <ListItem
+                    sx={{
+                      height: '90px'
+                    }}
+                    key={notification.id}
+                    alignItems="center"
+                  >
+                    <ListItemAvatar>
+                      <Avatar sx={{ backgroundColor: 'transparent' }}>
+                        {getNotificationIcon(notification.type)}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={notification.message}
+                      secondary={notification.time}
+                    />
+                  </ListItem>
+                  <Divider />
+                </>
+              ))}
+            </List>
+          </Box>
+        </Drawer>
         <MainContent open={open}>
           <Toolbar />
           <Container
             maxWidth="lg"
-            sx={{ mt: 0, mb: 4, pr: 0, mr: 0 }}
+            sx={{ mt: 0, ml: 0, mb: 4, pr: 0, mr: 0 }}
           >
             <Grid container>{children}</Grid>
           </Container>

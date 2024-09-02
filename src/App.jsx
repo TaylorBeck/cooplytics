@@ -3,12 +3,18 @@ import { Provider } from 'react-redux';
 import { store, persistor } from './redux/store';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { PersistGate } from 'redux-persist/integration/react';
+import ChickenDetailsPage from './pages/ChickenDetailsPage';
+import FarmDetailsPage from './pages/FarmDetailsPage';
+import FarmsPage from './pages/FarmsPage';
+import OrdersPage from './pages/OrdersPage';
 
 // Lazy load components
 const SignUp = lazy(() => import('./pages/SignUp'));
 const SignIn = lazy(() => import('./pages/SignIn'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const ChickensPage = lazy(() => import('./pages/ChickensPage'));
+const BreederPage = lazy(() => import('./pages/BreederPage'));
+const HatcheryPage = lazy(() => import('./pages/HatcheryPage'));
 const FinancesPage = lazy(() => import('./pages/FinancesPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
@@ -67,8 +73,24 @@ function App() {
                   element={<Dashboard />}
                 />
                 <Route
+                  path="/farms"
+                  element={<FarmsPage />}
+                />
+                <Route
+                  path="/farms/:farmId"
+                  element={<FarmDetailsPage />}
+                />
+                <Route
                   path="/chickens"
                   element={<ChickensPage />}
+                />
+                <Route
+                  path="/breeder"
+                  element={<BreederPage />}
+                />
+                <Route
+                  path="/hatchery"
+                  element={<HatcheryPage />}
                 />
                 <Route
                   path="/finances"
@@ -81,6 +103,14 @@ function App() {
                 <Route
                   path="/calendar"
                   element={<SettingsPage />}
+                />
+                <Route
+                  path="/farms/:farmId/chickens/:chickenId"
+                  element={<ChickenDetailsPage />}
+                />
+                <Route
+                  path="/orders"
+                  element={<OrdersPage />}
                 />
               </Route>
 
