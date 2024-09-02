@@ -27,7 +27,12 @@ export const subscribeToChickens = (farmId, callback) => {
 export const addChicken = async (farmId, chickenData) => {
   const response = await axios.post(
     `${API_URL}/farms/${farmId}/chickens`,
-    chickenData
+    chickenData,
+    {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
   );
   return response.data;
 };
