@@ -1,63 +1,47 @@
 import { useState } from 'react';
-import {
-  FormControlLabel,
-  Switch,
-  Button,
-  Box,
-  Typography,
-} from '@mui/material';
+import { FormControlLabel, Switch, Typography } from '@mui/material';
 
 export default function NotificationForm() {
-  const [emailNotifications, setEmailNotifications] = useState(false);
-  const [smsNotifications, setSmsNotifications] = useState(false);
+  const [twoFactorAuth, setTwoFactorAuth] = useState(false);
+  const [lockAccount, setLockAccount] = useState(false);
 
-  const handleSubmit = event => {
-    event.preventDefault();
-    console.log({ emailNotifications, smsNotifications });
-    // TODO: Implement notification settings update logic
+  const handleChange = event => {
+    const { name, checked } = event.target;
+    if (name === 'twoFactorAuth') {
+      setTwoFactorAuth(checked);
+    } else if (name === 'lockAccount') {
+      setLockAccount(checked);
+    }
   };
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit}
-      noValidate
-      sx={{ mt: 1 }}
-    >
+    <div sx={{ mt: 1 }}>
       <Typography
         variant="h6"
         gutterBottom
       >
-        Notification Preferences
+        Security Preferences
       </Typography>
       <FormControlLabel
         control={
           <Switch
-            checked={emailNotifications}
-            onChange={e => setEmailNotifications(e.target.checked)}
-            name="emailNotifications"
+            checked={twoFactorAuth}
+            onChange={handleChange}
+            name="twoFactorAuth"
           />
         }
-        label="Email Notifications"
+        label="Two-Factor Authentication"
       />
       <FormControlLabel
         control={
           <Switch
-            checked={smsNotifications}
-            onChange={e => setSmsNotifications(e.target.checked)}
-            name="smsNotifications"
+            checked={lockAccount}
+            onChange={handleChange}
+            name="lockAccount"
           />
         }
-        label="SMS Notifications"
+        label="Lock Account"
       />
-      <Button
-        type="submit"
-        fullWidth
-        variant="contained"
-        sx={{ mt: 3, mb: 2 }}
-      >
-        Update Notifications
-      </Button>
-    </Box>
+    </div>
   );
 }

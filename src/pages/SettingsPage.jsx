@@ -15,7 +15,7 @@ export default function SettingsPage() {
             component="h1"
             gutterBottom
           >
-            Admin Settings
+            Settings
           </Typography>
           <Typography
             variant="body1"

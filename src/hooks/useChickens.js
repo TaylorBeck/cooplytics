@@ -1,60 +1,90 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  subscribeToChickens,
-  addChicken,
-  updateChicken,
-  deleteChicken
-} from '../api/chickenApi';
+import { useState, useEffect } from 'react';
+import { ref, onValue, push, update, remove } from 'firebase/database';
+import { db } from '../api/firebaseConfig';
 
 /**
  * Hook for managing chicken data
- * @param {string} farmId
+ * @param {string} userId
  * @returns {Object} Chicken data and operations
  */
-export const useChickens = farmId => {
-  const queryClient = useQueryClient();
+export const useChickens = userId => {
+  const [chickens, setChickens] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const chickensQuery = useQuery({
-    queryKey: ['chickens', farmId],
-    queryFn: () =>
-      new Promise(resolve => {
-        const unsubscribe = subscribeToChickens(farmId, data => {
-          resolve(data);
-        });
-        return () => unsubscribe();
-      }),
-    refetchOnWindowFocus: false,
-    staleTime: Infinity
-  });
-
-  const addChickenMutation = useMutation({
-    mutationFn: chickenData => addChicken(farmId, chickenData),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['chickens', farmId]);
+  useEffect(() => {
+    if (!userId) {
+      setError('User not authenticated');
+      setIsLoading(false);
+      return;
     }
-  });
 
-  const updateChickenMutation = useMutation({
-    mutationFn: ({ chickenId, chickenData }) =>
-      updateChicken(farmId, chickenId, chickenData),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['chickens', farmId]);
-    }
-  });
+    const userFarmsRef = ref(db, `users/${userId}/farms`);
+    const chickensRef = ref(db, 'chickens');
 
-  const deleteChickenMutation = useMutation({
-    mutationFn: chickenId => deleteChicken(farmId, chickenId),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['chickens', farmId]);
-    }
-  });
+    const unsubscribe = onValue(
+      userFarmsRef,
+      farmSnapshot => {
+        if (farmSnapshot.exists()) {
+          const userFarms = farmSnapshot.val();
+
+          onValue(
+            chickensRef,
+            chickenSnapshot => {
+              const chickenData = chickenSnapshot.val();
+              if (chickenData) {
+                const userChickens = Object.entries(chickenData)
+                  .filter(([farmId]) => userFarms[farmId])
+                  .reduce((acc, [farmId, farmChickens]) => {
+                    acc[farmId] = farmChickens;
+                    return acc;
+                  }, {});
+                setChickens(userChickens);
+              } else {
+                setChickens({});
+              }
+              setIsLoading(false);
+            },
+            error => {
+              setError(error.message);
+              setIsLoading(false);
+            }
+          );
+        } else {
+          setChickens({});
+          setIsLoading(false);
+        }
+      },
+      error => {
+        setError(error.message);
+        setIsLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [userId]);
+
+  const addChicken = async (farmId, chickenData) => {
+    const chickenRef = ref(db, `chickens/${farmId}`);
+    await push(chickenRef, chickenData);
+  };
+
+  const updateChicken = async (farmId, chickenId, chickenData) => {
+    const chickenRef = ref(db, `chickens/${farmId}/${chickenId}`);
+    await update(chickenRef, chickenData);
+  };
+
+  const deleteChicken = async (farmId, chickenId) => {
+    const chickenRef = ref(db, `chickens/${farmId}/${chickenId}`);
+    await remove(chickenRef);
+  };
 
   return {
-    chickens: chickensQuery.data,
-    isLoading: chickensQuery.isLoading,
-    error: chickensQuery.error,
-    addChicken: addChickenMutation.mutate,
-    updateChicken: updateChickenMutation.mutate,
-    deleteChicken: deleteChickenMutation.mutate
+    chickens,
+    isLoading,
+    error,
+    addChicken,
+    updateChicken,
+    deleteChicken
   };
 };

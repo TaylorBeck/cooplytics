@@ -1,9 +1,8 @@
-import { useState } from 'react';
 import { TextField, Button, Box, Typography } from '@mui/material';
+import { useSelector } from 'react-redux';
 
 export default function ProfileForm() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const user = useSelector(state => state.auth.user);
 
   const handleSubmit = event => {
     event.preventDefault();
@@ -32,7 +31,7 @@ export default function ProfileForm() {
         label="Name"
         name="name"
         autoComplete="name"
-        value={name}
+        value={user.name}
         onChange={e => setName(e.target.value)}
       />
       <TextField
@@ -43,7 +42,7 @@ export default function ProfileForm() {
         label="Email Address"
         name="email"
         autoComplete="email"
-        value={email}
+        value={user.email}
         onChange={e => setEmail(e.target.value)}
       />
       <Button

@@ -1,29 +1,21 @@
 import { useState } from 'react';
-import {
-  FormControlLabel,
-  Switch,
-  Button,
-  Box,
-  Typography,
-} from '@mui/material';
+import { FormControlLabel, Switch, Typography } from '@mui/material';
 
 export default function NotificationForm() {
   const [emailNotifications, setEmailNotifications] = useState(false);
   const [smsNotifications, setSmsNotifications] = useState(false);
 
-  const handleSubmit = event => {
-    event.preventDefault();
-    console.log({ emailNotifications, smsNotifications });
-    // TODO: Implement notification settings update logic
+  const handleChange = event => {
+    const { name, checked } = event.target;
+    if (name === 'emailNotifications') {
+      setEmailNotifications(checked);
+    } else if (name === 'smsNotifications') {
+      setSmsNotifications(checked);
+    }
   };
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit}
-      noValidate
-      sx={{ mt: 1 }}
-    >
+    <div>
       <Typography
         variant="h6"
         gutterBottom
@@ -34,7 +26,7 @@ export default function NotificationForm() {
         control={
           <Switch
             checked={emailNotifications}
-            onChange={e => setEmailNotifications(e.target.checked)}
+            onChange={handleChange}
             name="emailNotifications"
           />
         }
@@ -44,20 +36,12 @@ export default function NotificationForm() {
         control={
           <Switch
             checked={smsNotifications}
-            onChange={e => setSmsNotifications(e.target.checked)}
+            onChange={handleChange}
             name="smsNotifications"
           />
         }
         label="SMS Notifications"
       />
-      <Button
-        type="submit"
-        fullWidth
-        variant="contained"
-        sx={{ mt: 3, mb: 2 }}
-      >
-        Update Notifications
-      </Button>
-    </Box>
+    </div>
   );
 }

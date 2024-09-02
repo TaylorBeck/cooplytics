@@ -4,7 +4,7 @@ import { Box, Typography, Button } from '@mui/material';
 import { styled } from '@mui/system';
 
 const NotFoundBackground = styled(Box)({
-  background: `url('https://s3-taylor-inventorymanagement.s3.us-west-2.amazonaws.com/404-min.jpg') no-repeat center center fixed`,
+  background: `url('https://s3-poultrypro.s3.us-west-2.amazonaws.com/404-min.jpg') no-repeat center center fixed`,
   backgroundSize: 'cover',
   height: '100vh',
   display: 'flex',
