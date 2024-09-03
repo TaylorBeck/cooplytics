@@ -118,6 +118,7 @@ Note: Make sure you have Node.js (version 14 or later, ideally 20) and npm insta
 - Firebase for authentication and real-time database
 - Axios for API requests
 - Domain hosted in Route 53
+- [Github Actions Workflow](https://github.com/TaylorBeck/poultrypro-client/blob/main/.github/workflows/azure-deployment.yml) using Github Action secrets
 
 ### Backend
 
@@ -127,8 +128,9 @@ Note: Make sure you have Node.js (version 14 or later, ideally 20) and npm insta
 - CORS for Cross-Origin Resource Sharing
 - Helmet for setting various HTTP headers for security
 - Morgan for HTTP request logging
-- Dotenv for environment variable management
+- Azure App Service Environment Variables for environment variable management
 - Azure App Service (P0v3 plan)
+- ([Github Action Workflow](https://github.com/TaylorBeck/poultrypro-server/blob/main/.github/workflows/azure-deployment.yml)) 
 - Custom autoscaling rules:
   - Scale out: +1 instance when CPU > 70% for 5 minutes
   - Scale in: -1 instance when CPU < 25% for 5 minutes
