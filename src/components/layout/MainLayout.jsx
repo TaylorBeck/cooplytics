@@ -416,7 +416,7 @@ export default function Dashboard({ children, title }) {
               }}
             >
               <ListItem
-                button
+                button={'true'}
                 onClick={handleLogout}
                 sx={{
                   justifyContent: open ? 'initial' : 'center',

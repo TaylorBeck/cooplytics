@@ -202,8 +202,16 @@ export default function FarmDetailsPage() {
       <Grid
         container
         spacing={3}
-        width="100%"
         mt="1px"
+        sx={{
+          width: '100%',
+          maxWidth: {
+            xs: '80vw',
+            sm: '60vw',
+            md: '70vw',
+            lg: '100%'
+          }
+        }}
       >
         {/* Farm Details Card */}
         <Grid
