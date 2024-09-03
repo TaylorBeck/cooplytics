@@ -91,7 +91,7 @@ Note: Make sure you have Node.js (version 14 or later, ideally 20) and npm insta
 3. Navigate to /chickens or /farms to Add/Edit/Delete poultry in your farm and track their health and growth.
 4. Each chicken will have a timeline of its measurements:
 
-<img width="424" alt="measurements" src="https://github.com/user-attachments/assets/78e077f5-166a-47f9-8504-3e18f0c64284">
+<img width="300" alt="measurements" src="https://github.com/user-attachments/assets/78e077f5-166a-47f9-8504-3e18f0c64284">
 
 6. Then for guest access, use a guest token (created automatically durin): https://poultrypro.net/guest/uniqueAccessToken2
 
@@ -99,10 +99,11 @@ Note: Make sure you have Node.js (version 14 or later, ideally 20) and npm insta
 
 7. A list of your farm business' orders can be accessed at /orders and downloaded as a CSV file.
 
-<img width="1552" alt="orders-page" src="https://github.com/user-attachments/assets/9340e87e-3d79-4cbe-976f-d2a0dceb41bc">
+<img width="800" alt="orders-page" src="https://github.com/user-attachments/assets/9340e87e-3d79-4cbe-976f-d2a0dceb41bc">
 
+8. NOTE: Navigating to a path that doesn't exist will end up on the 404 page. Simply go back or sign in again to continue.
 
-- [Usage](#usage)
+<img width="800" alt="404" src="https://github.com/user-attachments/assets/ccc8dfd2-c69a-4b97-90c3-6e3a9a2ff6ae">
 
 ## Tech Stack and Architecture
 
