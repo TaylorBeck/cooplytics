@@ -127,7 +127,7 @@ export default function ChickenDetailsPage() {
               md={6}
             >
               <img
-                src={chicken.images?.image1?.url}
+                src={chicken.imageUrl}
                 alt={chicken.name}
                 style={{ width: '375px', height: '375px', borderRadius: '8px' }}
               />

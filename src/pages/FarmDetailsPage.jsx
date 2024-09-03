@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { ref, onValue } from 'firebase/database';
 import { db } from '../api/firebaseConfig';
@@ -28,23 +28,33 @@ import {
   CardContent,
   CardActionArea,
   CardMedia,
-  List,
-  ListItem,
-  ListItemText
+  Button,
+  TableSortLabel
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import AddIcon from '@mui/icons-material/Add';
+import { useChickens } from '../hooks/useChickens';
+import ChickenModal from '../components/ChickenModal';
 
+// Register necessary Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export default function FarmDetailsPage() {
   const { farmId } = useParams();
+  const navigate = useNavigate();
+  const { addChicken, updateChicken } = useChickens();
+
   const [farm, setFarm] = useState(null);
   const [chickens, setChickens] = useState([]);
   const [inventory, setInventory] = useState(null);
   const [feedChartData, setFeedChartData] = useState(null);
   const [equipmentChartData, setEquipmentChartData] = useState(null);
-  const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingChicken, setEditingChicken] = useState(null);
+  const [orderBy, setOrderBy] = useState('name');
+  const [order, setOrder] = useState('asc');
 
+  // Chart options for consistent styling across charts
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -61,6 +71,7 @@ export default function FarmDetailsPage() {
   };
 
   useEffect(() => {
+    // Set up real-time listeners for farm, chickens, and inventory data
     const farmRef = ref(db, `farms/${farmId}`);
     const chickensRef = ref(db, `chickens/${farmId}`);
     const inventoryRef = ref(db, `inventory/${farmId}`);
@@ -71,17 +82,24 @@ export default function FarmDetailsPage() {
 
     onValue(chickensRef, snapshot => {
       const data = snapshot.val();
-      const chickensArray = data ? Object.keys(data).map(key => data[key]) : [];
+      const chickensArray = data
+        ? Object.entries(data).map(([key, value]) => ({
+            id: key,
+            ...value
+          }))
+        : [];
+      console.log('chickensArray', chickensArray);
 
       setChickens(chickensArray);
     });
 
+    // Prepare chart data when inventory changes
     onValue(inventoryRef, snapshot => {
       const inventoryData = snapshot.val();
       setInventory(inventoryData);
 
       if (inventoryData) {
-        // Prepare feed chart data
+        // Transform inventory data into chart-friendly format
         const feedLabels = Object.keys(inventoryData.feed);
         const feedData = feedLabels.map(label => inventoryData.feed[label].quantity);
         setFeedChartData({
@@ -94,7 +112,6 @@ export default function FarmDetailsPage() {
           ]
         });
 
-        // Prepare equipment chart data
         const equipmentLabels = Object.keys(inventoryData.equipment);
         const equipmentData = equipmentLabels.map(
           label => inventoryData.equipment[label].total
@@ -112,16 +129,67 @@ export default function FarmDetailsPage() {
     });
   }, [farmId]);
 
+  const handleChickenClick = useCallback(
+    chickenId => {
+      navigate(`/farms/${farmId}/chickens/${chickenId}`);
+    },
+    [farmId, navigate]
+  );
+
+  const handleAddChicken = useCallback(() => {
+    setEditingChicken(null);
+    setIsModalOpen(true);
+  }, []);
+
+  const handleEditChicken = useCallback(chicken => {
+    setEditingChicken(chicken);
+    setIsModalOpen(true);
+  }, []);
+
+  const handleSaveChicken = useCallback(
+    async chickenData => {
+      try {
+        if (editingChicken) {
+          await updateChicken(farmId, editingChicken.id, chickenData);
+        } else {
+          await addChicken(farmId, chickenData);
+        }
+        setIsModalOpen(false);
+        // Refresh chickens data if needed
+      } catch (error) {
+        console.error('Error saving chicken:', error);
+        // Handle error (e.g., show an error message)
+      }
+    },
+    [farmId, editingChicken, updateChicken, addChicken]
+  );
+
+  const handleRequestSort = useCallback(
+    property => {
+      setOrder(prevOrder =>
+        orderBy === property && prevOrder === 'asc' ? 'desc' : 'asc'
+      );
+      setOrderBy(property);
+    },
+    [orderBy]
+  );
+
+  // Sort chickens based on current sort criteria
+  const sortedChickens = useMemo(() => {
+    return [...chickens].sort((a, b) => {
+      if (a[orderBy] < b[orderBy]) return order === 'asc' ? -1 : 1;
+      if (a[orderBy] > b[orderBy]) return order === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [chickens, order, orderBy]);
+
   if (!farm) {
     return <div>Loading...</div>;
   }
 
-  const handleChickenClick = chickenId => {
-    navigate(`/farms/${farmId}/chickens/${chickenId}`);
-  };
-
   return (
     <MainLayout>
+      {/* Farm Details and Inventory Charts */}
       <Grid
         container
         spacing={3}
@@ -238,13 +306,28 @@ export default function FarmDetailsPage() {
 
       {/* Chickens Table */}
       <Box sx={{ mt: 4, width: '100%', overflowX: 'auto' }}>
-        <Typography
-          variant="h5"
-          component="h2"
-          gutterBottom
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 2
+          }}
         >
-          Chickens
-        </Typography>
+          <Typography
+            variant="h5"
+            component="h2"
+          >
+            Chickens
+          </Typography>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleAddChicken}
+          >
+            Add Chicken
+          </Button>
+        </Box>
         <TableContainer component={Paper}>
           <Table
             sx={{ minWidth: '100%' }}
@@ -252,26 +335,52 @@ export default function FarmDetailsPage() {
           >
             <TableHead>
               <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Type</TableCell>
-                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                  Date Hatched
-                </TableCell>
-                <TableCell>Current Location</TableCell>
-                <TableCell>Egg Color</TableCell>
-                <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
-                  Weight (kg)
-                </TableCell>
-                <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
-                  Height (cm)
-                </TableCell>
+                {[
+                  { id: 'name', label: 'Name' },
+                  { id: 'type', label: 'Type' },
+                  {
+                    id: 'dateHatched',
+                    label: 'Date Hatched',
+                    hide: { xs: true, md: false }
+                  },
+                  { id: 'currentLocation', label: 'Current Location' },
+                  { id: 'eggColor', label: 'Egg Color' },
+                  {
+                    id: 'currentWeight',
+                    label: 'Weight (kg)',
+                    hide: { xs: true, lg: false }
+                  },
+                  {
+                    id: 'currentHeight',
+                    label: 'Height (cm)',
+                    hide: { xs: true, lg: false }
+                  },
+                  { id: 'popularity', label: 'Popularity' }
+                ].map(headCell => (
+                  <TableCell
+                    key={headCell.id}
+                    sx={
+                      headCell.hide
+                        ? { display: { ...headCell.hide, table: 'table-cell' } }
+                        : {}
+                    }
+                  >
+                    <TableSortLabel
+                      active={orderBy === headCell.id}
+                      direction={orderBy === headCell.id ? order : 'asc'}
+                      onClick={() => handleRequestSort(headCell.id)}
+                    >
+                      {headCell.label}
+                    </TableSortLabel>
+                  </TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {chickens.map(chicken => (
+              {sortedChickens.map(chicken => (
                 <TableRow
-                  key={chicken.trackingCode}
-                  onClick={() => handleChickenClick('chicken10')}
+                  key={chicken.id}
+                  onClick={() => handleChickenClick(chicken.id)}
                   sx={{
                     cursor: 'pointer',
                     '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
@@ -285,17 +394,26 @@ export default function FarmDetailsPage() {
                   <TableCell>{chicken.currentLocation}</TableCell>
                   <TableCell>{chicken.eggColor}</TableCell>
                   <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
-                    {chicken.measurements?.weight}
+                    {chicken.currentWeight}
                   </TableCell>
                   <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
-                    {chicken.measurements?.height}
+                    {chicken.currentHeight}
                   </TableCell>
+                  <TableCell>{chicken.popularity}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
       </Box>
+
+      {/* Modal for adding/editing chickens */}
+      <ChickenModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveChicken}
+        chicken={editingChicken}
+      />
     </MainLayout>
   );
 }
