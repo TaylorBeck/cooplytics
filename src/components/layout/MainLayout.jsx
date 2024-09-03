@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../../redux/slices/authSlice';
+import { logout, clearGuestAccess } from '../../redux/slices/authSlice';
 import { persistor } from '../../redux/store';
 import { auth } from '../../api/firebaseConfig';
 import { Breadcrumbs, Link } from '@mui/material';
@@ -53,6 +53,7 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
+// Custom drawer widths for open and closed states
 const drawerWidth = 200;
 const closedDrawerWidth = 59;
 
@@ -80,6 +81,7 @@ const theme = createTheme({
   }
 });
 
+// Custom styled components for responsive drawer and app bar
 const StyledAppBar = styled(AppBar, {
   shouldForwardProp: prop => prop !== 'open'
 })(({ theme, open }) => ({
@@ -167,12 +169,20 @@ export default function Dashboard({ children, title }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
+  const isGuest = useSelector(state => state.auth.isGuest);
+  const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
   const [open, setOpen] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const location = useLocation();
 
+  // Filter menu items for guest users
+  const visibleMenuItems = isGuest
+    ? menuItems.filter(item => item.text === 'Farms')
+    : menuItems;
+
+  // Mapping for breadcrumb navigation
   const breadcrumbNameMap = {
     '/dashboard': 'Dashboard',
     '/farms': 'Farms',
@@ -210,9 +220,13 @@ export default function Dashboard({ children, title }) {
   const popoverOpen = Boolean(anchorEl);
 
   const handleLogout = async () => {
-    await auth.signOut(); // Sign out from Firebase
-    dispatch(logout()); // Dispatch the logout action
-    persistor.purge(); // Clear persisted store data
+    if (isGuest) {
+      dispatch(clearGuestAccess());
+    } else {
+      await auth.signOut(); // Sign out from Firebase
+      dispatch(logout()); // Dispatch the logout action
+      persistor.purge(); // Clear persisted store data
+    }
     navigate('/sign-in'); // Navigate to sign-in page
   };
 
@@ -220,6 +234,7 @@ export default function Dashboard({ children, title }) {
     setNotificationsOpen(!notificationsOpen);
   };
 
+  // Mock notifications data
   const notifications = [
     {
       id: 1,
@@ -259,6 +274,7 @@ export default function Dashboard({ children, title }) {
     }
   ];
 
+  // Helper function to get appropriate icon for notification type
   const getNotificationIcon = type => {
     switch (type) {
       case 'warning':
@@ -276,8 +292,10 @@ export default function Dashboard({ children, title }) {
 
   return (
     <ThemeProvider theme={theme}>
+      {/* Main layout structure */}
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
+        {/* Responsive app bar */}
         <StyledAppBar
           position="fixed"
           open={open}
@@ -320,6 +338,7 @@ export default function Dashboard({ children, title }) {
             </IconButton>
           </Toolbar>
         </StyledAppBar>
+        {/* Responsive side drawer */}
         <StyledDrawer
           variant="permanent"
           open={open}
@@ -353,7 +372,7 @@ export default function Dashboard({ children, title }) {
           </Toolbar>
           <Divider />
           <List component="nav">
-            {menuItems.map(item => (
+            {visibleMenuItems.map(item => (
               <ListItem
                 button={'true'}
                 key={item.text}
@@ -386,78 +405,43 @@ export default function Dashboard({ children, title }) {
               </ListItem>
             ))}
           </List>
-          <Box
-            sx={{
-              bottom: 0,
-              width: '100%',
-              p: 2,
-              display: 'flex',
-              height: '100%',
-              alignItems: 'flex-end',
-              justifyContent: 'center'
-            }}
-          >
-            <IconButton
-              onClick={handlePopoverOpen}
+          {/* Add Logout option at the bottom for both users and guests */}
+          {isAuthenticated && (
+            <Box
               sx={{
-                marginLeft: '0',
-                padding: '0'
+                position: 'absolute',
+                bottom: 0,
+                width: '100%',
+                p: 2
               }}
             >
-              <Avatar
-                alt="User Avatar"
-                src={
-                  user?.image ||
-                  'https://s3-poultrypro.s3.us-west-2.amazonaws.com/face-1.png'
-                }
-              />
-            </IconButton>
-            <Popover
-              open={popoverOpen}
-              anchorEl={anchorEl}
-              onClose={handlePopoverClose}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right'
-              }}
-              transformOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-            >
-              <List>
-                <ListItem
-                  button={'true'}
-                  onClick={() => navigate('/settings')}
+              <ListItem
+                button
+                onClick={handleLogout}
+                sx={{
+                  justifyContent: open ? 'initial' : 'center',
+                  px: 2.5,
+                  '&:hover': { cursor: 'pointer' }
+                }}
+              >
+                <ListItemIcon
                   sx={{
-                    '&:hover': {
-                      cursor: 'pointer'
-                    }
+                    minWidth: 0,
+                    mr: open ? 3 : 'auto',
+                    justifyContent: 'center'
                   }}
                 >
-                  <ListItemIcon>
-                    <SettingsIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Settings" />
-                </ListItem>
-                <ListItem
-                  button={'true'}
-                  onClick={handleLogout}
-                  sx={{
-                    '&:hover': {
-                      cursor: 'pointer'
-                    }
-                  }}
-                >
-                  <ListItemIcon>
-                    <LogoutIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Logout" />
-                </ListItem>
-              </List>
-            </Popover>
-          </Box>
+                  <LogoutIcon />
+                </ListItemIcon>
+                <ListItemText
+                  primary={isGuest ? 'Exit Guest' : 'Logout'}
+                  sx={{ opacity: open ? 1 : 0 }}
+                />
+              </ListItem>
+            </Box>
+          )}
         </StyledDrawer>
+        {/* Notifications drawer */}
         <Drawer
           anchor="right"
           open={notificationsOpen}
@@ -502,12 +486,14 @@ export default function Dashboard({ children, title }) {
             </List>
           </Box>
         </Drawer>
+        {/* Main content area */}
         <MainContent open={open}>
           <Toolbar />
           <Container
             maxWidth="lg"
             sx={{ mt: 0, ml: 0, mb: 4, pr: 0, mr: 0 }}
           >
+            {/* Dynamic breadcrumb navigation */}
             <Breadcrumbs
               aria-label="breadcrumb"
               sx={{ mb: 2 }}
@@ -542,6 +528,7 @@ export default function Dashboard({ children, title }) {
                 );
               })}
             </Breadcrumbs>
+            {/* Render child components */}
             <Grid container>{children}</Grid>
           </Container>
         </MainContent>

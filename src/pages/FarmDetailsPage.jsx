@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { ref, onValue } from 'firebase/database';
 import { db } from '../api/firebaseConfig';
 import MainLayout from '../components/layout/MainLayout';
+import { useSelector } from 'react-redux';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -53,6 +54,9 @@ export default function FarmDetailsPage() {
   const [editingChicken, setEditingChicken] = useState(null);
   const [orderBy, setOrderBy] = useState('name');
   const [order, setOrder] = useState('asc');
+
+  const isGuest = useSelector(state => state.auth.isGuest);
+  const guestFarmId = useSelector(state => state.auth.guestFarmId);
 
   // Chart options for consistent styling across charts
   const chartOptions = {
@@ -131,9 +135,14 @@ export default function FarmDetailsPage() {
 
   const handleChickenClick = useCallback(
     chickenId => {
+      if (isGuest && guestFarmId !== farmId) {
+        // Guest doesn't have access to this farm
+        console.error('Guest does not have access to this farm');
+        return;
+      }
       navigate(`/farms/${farmId}/chickens/${chickenId}`);
     },
-    [farmId, navigate]
+    [farmId, navigate, isGuest, guestFarmId]
   );
 
   const handleAddChicken = useCallback(() => {
@@ -320,13 +329,15 @@ export default function FarmDetailsPage() {
           >
             Chickens
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleAddChicken}
-          >
-            Add Chicken
-          </Button>
+          {!isGuest && (
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleAddChicken}
+            >
+              Add Chicken
+            </Button>
+          )}
         </Box>
         <TableContainer component={Paper}>
           <Table
@@ -408,12 +419,14 @@ export default function FarmDetailsPage() {
       </Box>
 
       {/* Modal for adding/editing chickens */}
-      <ChickenModal
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleSaveChicken}
-        chicken={editingChicken}
-      />
+      {!isGuest && (
+        <ChickenModal
+          open={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleSaveChicken}
+          chicken={editingChicken}
+        />
+      )}
     </MainLayout>
   );
 }

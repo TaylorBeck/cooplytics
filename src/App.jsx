@@ -1,12 +1,13 @@
 import React, { Suspense, lazy } from 'react';
 import { Provider } from 'react-redux';
 import { store, persistor } from './redux/store';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { PersistGate } from 'redux-persist/integration/react';
 import ChickenDetailsPage from './pages/ChickenDetailsPage';
 import FarmDetailsPage from './pages/FarmDetailsPage';
 import FarmsPage from './pages/FarmsPage';
 import OrdersPage from './pages/OrdersPage';
+import GuestAccess from './pages/GuestAccess';
 
 // Lazy load components
 const SignUp = lazy(() => import('./pages/SignUp'));
@@ -51,7 +52,7 @@ function App() {
         loading={null}
         persistor={persistor}
       >
-        <BrowserRouter>
+        <Router>
           <Suspense fallback={<Loading />}>
             <Routes>
               <Route
@@ -115,12 +116,17 @@ function App() {
               </Route>
 
               <Route
+                path="/guest/:guestToken"
+                element={<GuestAccess />}
+              />
+
+              <Route
                 path="*"
                 element={<NotFound />}
               />
             </Routes>
           </Suspense>
-        </BrowserRouter>
+        </Router>
       </PersistGate>
     </Provider>
   );

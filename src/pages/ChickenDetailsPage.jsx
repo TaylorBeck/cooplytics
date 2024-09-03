@@ -26,34 +26,31 @@ export default function ChickenDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const user = useSelector(state => state.auth.user);
+  const isGuest = useSelector(state => state.auth.isGuest);
+  const guestToken = useSelector(state => state.auth.guestToken);
+  const guestFarmId = useSelector(state => state.auth.guestFarmId);
 
   useEffect(() => {
     const fetchChicken = async () => {
-      if (!user?.uid) {
+      if (!user?.uid && !isGuest) {
         setError('User not authenticated');
         setLoading(false);
         return;
       }
 
       try {
-        // First, check if the user has access to this farm
-        const userFarmRef = ref(db, `users/${user.uid}/farms/${farmId}`);
-        const userFarmSnapshot = await get(userFarmRef);
+        // Check if the user is authenticated or if they have guest access to this farm
+        if (user?.uid || (isGuest && guestFarmId === farmId)) {
+          const chickenRef = ref(db, `chickens/${farmId}/${chickenId}`);
+          const chickenSnapshot = await get(chickenRef);
 
-        if (!userFarmSnapshot.exists() || !userFarmSnapshot.val()) {
-          setError('You do not have access to this farm');
-          setLoading(false);
-          return;
-        }
-
-        // If the user has access, fetch the chicken data
-        const chickenRef = ref(db, `chickens/${farmId}/${chickenId}`);
-        const chickenSnapshot = await get(chickenRef);
-
-        if (chickenSnapshot.exists()) {
-          setChicken(chickenSnapshot.val());
+          if (chickenSnapshot.exists()) {
+            setChicken(chickenSnapshot.val());
+          } else {
+            setError('Chicken not found');
+          }
         } else {
-          setError('Chicken not found');
+          setError('You do not have access to this farm');
         }
       } catch (err) {
         console.error('Error fetching chicken:', err);
@@ -64,7 +61,7 @@ export default function ChickenDetailsPage() {
     };
 
     fetchChicken();
-  }, [farmId, chickenId, user]);
+  }, [farmId, chickenId, user, isGuest, guestFarmId]);
 
   const getMostRecentMeasurement = measurements => {
     if (!measurements) return null;

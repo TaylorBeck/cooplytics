@@ -2,10 +2,13 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   user: null,
-  idToken: null,
   isAuthenticated: false,
+  isGuest: false,
+  guestToken: null,
+  guestFarmId: null,
   loading: false,
-  error: null
+  error: null,
+  idToken: null
 };
 
 const authSlice = createSlice({
@@ -29,15 +32,30 @@ const authSlice = createSlice({
     },
     logout: state => {
       state.user = null;
-      state.idToken = null; // Clear idToken
+      state.idToken = null;
       state.isAuthenticated = false;
+      state.isGuest = false;
+      state.guestToken = null;
+      state.guestFarmId = null;
       state.loading = false;
       state.error = null;
     },
     clearError: state => {
       state.error = null;
     },
-    reset: state => initialState // Add reset action
+    reset: state => initialState,
+    setGuestAccess: (state, action) => {
+      state.isGuest = true;
+      state.guestToken = action.payload.guestToken;
+      state.guestFarmId = action.payload.farmId;
+      state.isAuthenticated = true;
+    },
+    clearGuestAccess: state => {
+      state.isGuest = false;
+      state.guestToken = null;
+      state.guestFarmId = null;
+      state.isAuthenticated = false;
+    }
   }
 });
 
@@ -47,7 +65,9 @@ export const {
   loginFailure,
   logout,
   clearError,
-  reset
+  reset,
+  setGuestAccess,
+  clearGuestAccess
 } = authSlice.actions;
 
 export default authSlice.reducer;
