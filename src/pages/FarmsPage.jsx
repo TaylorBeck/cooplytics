@@ -11,7 +11,8 @@ import {
   Card,
   CardContent,
   CardMedia,
-  CircularProgress
+  CircularProgress,
+  Skeleton
 } from '@mui/material';
 
 export default function FarmsPage() {
@@ -70,59 +71,63 @@ export default function FarmsPage() {
     fetchUserFarms();
   }, [user]);
 
-  if (loading) {
-    return (
-      <MainLayout>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100vh'
-          }}
+  const renderContent = () => (
+    <>
+      {loading ? (
+        <Skeleton
+          variant="text"
+          width="200px"
+          height={40}
+          sx={{ mb: 2 }}
+        />
+      ) : (
+        <Typography
+          variant="h4"
+          component="h2"
+          mb={2}
         >
-          <CircularProgress />
-        </Box>
-      </MainLayout>
-    );
-  }
-
-  if (error) {
-    return (
-      <MainLayout>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100vh'
-          }}
-        >
-          <Typography
-            variant="h6"
-            color="error"
-          >
-            {error}
-          </Typography>
-        </Box>
-      </MainLayout>
-    );
-  }
-
-  return (
-    <MainLayout>
-      <Typography
-        variant="h4"
-        component="h2"
-        mb={2}
-      >
-        Farms
-      </Typography>
+          Farms
+        </Typography>
+      )}
       <Grid
         container
         spacing={3}
       >
-        {farms.length > 0 ? (
+        {loading ? (
+          [1, 2, 3].map(item => (
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              md={4}
+              key={item}
+            >
+              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Skeleton
+                  variant="rectangular"
+                  height={140}
+                />
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Skeleton
+                    variant="text"
+                    height={32}
+                    width="80%"
+                  />
+                  <Skeleton
+                    variant="text"
+                    height={24}
+                    width="60%"
+                  />
+                  <Skeleton
+                    variant="text"
+                    height={24}
+                    width="40%"
+                  />
+                </CardContent>
+              </Card>
+            </Grid>
+          ))
+        ) : farms.length > 0 ? (
           farms.map(farm => (
             <Grid
               item
@@ -187,6 +192,30 @@ export default function FarmsPage() {
           </Grid>
         )}
       </Grid>
-    </MainLayout>
+    </>
   );
+
+  if (error) {
+    return (
+      <MainLayout>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh'
+          }}
+        >
+          <Typography
+            variant="h6"
+            color="error"
+          >
+            {error}
+          </Typography>
+        </Box>
+      </MainLayout>
+    );
+  }
+
+  return <MainLayout>{renderContent()}</MainLayout>;
 }

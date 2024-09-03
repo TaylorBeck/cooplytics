@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../redux/slices/authSlice';
 import { persistor } from '../../redux/store';
 import { auth } from '../../api/firebaseConfig';
+import { Breadcrumbs, Link } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 
 import {
   CssBaseline,
@@ -36,7 +38,6 @@ import EggIcon from '@mui/icons-material/Egg';
 import WarehouseIcon from '@mui/icons-material/Warehouse';
 import LocalDiningIcon from '@mui/icons-material/LocalDining';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import CalendarIcon from '@mui/icons-material/CalendarMonth';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -134,8 +135,8 @@ const menuItems = [
   { text: 'Hatchery', icon: <EggIcon />, path: '/hatchery' },
   { text: 'Feed Mill', icon: <LocalDiningIcon />, path: '/feed-mill' },
   { text: 'Finances', icon: <AttachMoneyIcon />, path: '/finances' },
-  { text: 'Calendar', icon: <CalendarIcon />, path: '/calendar' },
-  { text: 'Orders', icon: <ShoppingCartIcon />, path: '/orders' }
+  { text: 'Orders', icon: <ShoppingCartIcon />, path: '/orders' },
+  { text: 'Settings', icon: <SettingsIcon />, path: '/settings' }
 ];
 
 const Logo = styled('img')({
@@ -170,6 +171,21 @@ export default function Dashboard({ children, title }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const location = useLocation();
+
+  const breadcrumbNameMap = {
+    '/dashboard': 'Dashboard',
+    '/farms': 'Farms',
+    '/chickens': 'Chickens',
+    '/breeder': 'Breeder',
+    '/hatchery': 'Hatchery',
+    '/feed-mill': 'Feed Mill',
+    '/finances': 'Finances',
+    '/orders': 'Orders',
+    '/settings': 'Settings'
+  };
+
+  const pathnames = location.pathname.split('/').filter(x => x);
 
   useEffect(() => {
     if (isSmallScreen) {
@@ -462,7 +478,7 @@ export default function Dashboard({ children, title }) {
             </Typography>
             <List>
               {notifications.map(notification => (
-                <>
+                <div key={notification.id}>
                   <ListItem
                     sx={{
                       height: '90px'
@@ -481,7 +497,7 @@ export default function Dashboard({ children, title }) {
                     />
                   </ListItem>
                   <Divider />
-                </>
+                </div>
               ))}
             </List>
           </Box>
@@ -492,6 +508,40 @@ export default function Dashboard({ children, title }) {
             maxWidth="lg"
             sx={{ mt: 0, ml: 0, mb: 4, pr: 0, mr: 0 }}
           >
+            <Breadcrumbs
+              aria-label="breadcrumb"
+              sx={{ mb: 2 }}
+            >
+              <Link
+                component={RouterLink}
+                color="inherit"
+                to="/dashboard"
+              >
+                Home
+              </Link>
+              {pathnames.map((value, index) => {
+                const last = index === pathnames.length - 1;
+                const to = `/${pathnames.slice(0, index + 1).join('/')}`;
+
+                return last ? (
+                  <Typography
+                    color="text.primary"
+                    key={to}
+                  >
+                    {breadcrumbNameMap[to] || value}
+                  </Typography>
+                ) : (
+                  <Link
+                    component={RouterLink}
+                    color="inherit"
+                    to={to}
+                    key={to}
+                  >
+                    {breadcrumbNameMap[to] || value}
+                  </Link>
+                );
+              })}
+            </Breadcrumbs>
             <Grid container>{children}</Grid>
           </Container>
         </MainContent>

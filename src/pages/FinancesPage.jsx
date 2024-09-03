@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import MainLayout from '../components/layout/MainLayout';
 import { Grid, Paper, Typography, Box, CircularProgress } from '@mui/material';
 import { AttachMoney, TrendingUp, TrendingDown, BarChart } from '@mui/icons-material';
@@ -33,7 +33,22 @@ const StatCard = ({ title, value, icon, color }) => (
     elevation={3}
     sx={{ p: 2, display: 'flex', alignItems: 'center' }}
   >
-    <Box sx={{ mr: 2, bgcolor: `${color}.light`, p: 1, borderRadius: 1 }}>{icon}</Box>
+    <Box
+      sx={{
+        mr: 2,
+        bgcolor: `${color}.light`,
+        borderRadius: 1,
+        width: 56,
+        height: 56,
+        minWidth: 56,
+        minHeight: 56,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}
+    >
+      {React.cloneElement(icon, { sx: { fontSize: 32, color: `${color}.main` } })}
+    </Box>
     <Box>
       <Typography
         variant="h6"

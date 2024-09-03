@@ -1,4 +1,4 @@
-import { ref, onValue } from 'firebase/database';
+import { ref, onValue, push, set } from 'firebase/database';
 import { db } from './firebaseConfig';
 import axios from 'axios';
 
@@ -22,19 +22,24 @@ export const subscribeToChickens = (farmId, callback) => {
  * Adds a new chicken
  * @param {string} farmId
  * @param {Object} chickenData
+ * @param {Object} user
  * @returns {Promise<Object>}
  */
-export const addChicken = async (farmId, chickenData) => {
-  const response = await axios.post(
-    `${API_URL}/farms/${farmId}/chickens`,
-    chickenData,
-    {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }
-  );
-  return response.data;
+export const addChicken = async (farmId, chickenData, user) => {
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
+  const chickensRef = ref(db, `chickens/${farmId}`);
+  const newChickenRef = push(chickensRef);
+
+  await set(newChickenRef, {
+    ...chickenData,
+    createdBy: user.uid,
+    createdAt: new Date().toISOString()
+  });
+
+  return { id: newChickenRef.key, ...chickenData };
 };
 
 /**

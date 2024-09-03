@@ -1,10 +1,13 @@
+import { useState, useEffect } from 'react';
 import MainLayout from '../components/layout/MainLayout';
 import {
   Container,
   Grid,
   Paper,
   Typography,
-  useMediaQuery
+  useMediaQuery,
+  Box,
+  CircularProgress
 } from '@mui/material';
 import { Line, Bar, Pie } from 'react-chartjs-2';
 import {
@@ -19,6 +22,7 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
+import { Egg, Pets, LocalDrink, Thermostat } from '@mui/icons-material';
 
 ChartJS.register(
   CategoryScale,
@@ -85,8 +89,57 @@ const waterConsumptionData = [
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
+// Add StatCard component
+const StatCard = ({ title, value, icon, color }) => (
+  <Paper
+    elevation={3}
+    sx={{ p: 2, display: 'flex', alignItems: 'center', height: '100%' }}
+  >
+    <Box sx={{ mr: 2, bgcolor: `${color}.light`, p: 1, borderRadius: 1 }}>{icon}</Box>
+    <Box>
+      <Typography
+        variant="h6"
+        component="div"
+      >
+        {title}
+      </Typography>
+      <Typography
+        variant="h4"
+        component="div"
+        fontWeight="bold"
+      >
+        {value}
+      </Typography>
+    </Box>
+  </Paper>
+);
+
 export default function Dashboard() {
   const isSmallScreen = useMediaQuery('(max-width:899px)');
+  const [overallData, setOverallData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchOverallData = async () => {
+      try {
+        // Replace this with your actual API call
+        const response = {
+          totalEggs: 15000,
+          totalChickens: 5000,
+          averageWaterConsumption: 2500,
+          averageTemperature: 24
+        };
+        setOverallData(response);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchOverallData();
+  }, []);
 
   // Chart configurations
   const lineChartOptions = {
@@ -119,6 +172,31 @@ export default function Dashboard() {
     }
   };
 
+  if (loading) {
+    return (
+      <MainLayout>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh'
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      </MainLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <MainLayout>
+        <Typography color="error">{error}</Typography>
+      </MainLayout>
+    );
+  }
+
   return (
     <MainLayout>
       <Container
@@ -129,6 +207,60 @@ export default function Dashboard() {
           container
           spacing={3}
         >
+          {/* StatCards */}
+          <Grid
+            item
+            xs={12}
+            sm={6}
+            md={3}
+          >
+            <StatCard
+              title="Total Eggs"
+              value={overallData.totalEggs.toLocaleString()}
+              icon={<Egg sx={{ color: 'white' }} />}
+              color="primary"
+            />
+          </Grid>
+          <Grid
+            item
+            xs={12}
+            sm={6}
+            md={3}
+          >
+            <StatCard
+              title="Total Chickens"
+              value={overallData.totalChickens.toLocaleString()}
+              icon={<Pets sx={{ color: 'success.main' }} />}
+              color="success"
+            />
+          </Grid>
+          <Grid
+            item
+            xs={12}
+            sm={6}
+            md={3}
+          >
+            <StatCard
+              title="Avg. Water (L)"
+              value={overallData.averageWaterConsumption.toLocaleString()}
+              icon={<LocalDrink sx={{ color: 'info.main' }} />}
+              color="info"
+            />
+          </Grid>
+          <Grid
+            item
+            xs={12}
+            sm={6}
+            md={3}
+          >
+            <StatCard
+              title="Avg. Temp (°C)"
+              value={overallData.averageTemperature.toFixed(1)}
+              icon={<Thermostat sx={{ color: 'warning.main' }} />}
+              color="warning"
+            />
+          </Grid>
+
           {/* Egg Production */}
           <Grid
             item
