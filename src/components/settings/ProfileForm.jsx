@@ -1,13 +1,64 @@
-import { TextField, Button, Box, Typography } from '@mui/material';
-import { useSelector } from 'react-redux';
+import { useState } from 'react';
+import {
+  TextField,
+  Button,
+  Box,
+  Typography,
+  Snackbar,
+  Alert,
+  CircularProgress
+} from '@mui/material';
+import { useSelector, useDispatch } from 'react-redux';
+import { updateProfile } from 'firebase/auth';
+import { ref, update } from 'firebase/database';
+import { auth, db } from '../../api/firebaseConfig';
+import { loginSuccess } from '../../redux/slices/authSlice';
 
 export default function ProfileForm() {
   const user = useSelector(state => state.auth.user);
+  const dispatch = useDispatch();
+  const [name, setName] = useState(user.name);
+  const [email, setEmail] = useState(user.email);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = event => {
+  const handleSubmit = async event => {
     event.preventDefault();
-    console.log({ name, email });
-    // TODO: Implement profile update logic
+    setLoading(true);
+    try {
+      // Update Firebase Auth profile
+      await updateProfile(auth.currentUser, { displayName: name });
+
+      // Update email if changed
+      if (email !== user.email) {
+        await auth.currentUser.updateEmail(email);
+      }
+
+      // Update Realtime Database
+      const userRef = ref(db, `users/${auth.currentUser.uid}`);
+      await update(userRef, { name, email });
+
+      // Get the updated ID token
+      const idToken = await auth.currentUser.getIdToken(true);
+
+      // Update Redux store
+      dispatch(loginSuccess({ user: { ...user, name, email }, idToken }));
+
+      // Show success message
+      setOpenSnackbar(true);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      // You might want to show an error message here as well
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnackbar(false);
   };
 
   return (
@@ -31,7 +82,7 @@ export default function ProfileForm() {
         label="Name"
         name="name"
         autoComplete="name"
-        value={user.name}
+        value={name}
         onChange={e => setName(e.target.value)}
       />
       <TextField
@@ -42,7 +93,7 @@ export default function ProfileForm() {
         label="Email Address"
         name="email"
         autoComplete="email"
-        value={user.email}
+        value={email}
         onChange={e => setEmail(e.target.value)}
       />
       <Button
@@ -50,9 +101,23 @@ export default function ProfileForm() {
         fullWidth
         variant="contained"
         sx={{ mt: 3, mb: 2 }}
+        disabled={loading}
       >
-        Update Profile
+        {loading ? <CircularProgress size={24} /> : 'Update Profile'}
       </Button>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity="success"
+          sx={{ width: '100%' }}
+        >
+          Profile updated successfully!
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
