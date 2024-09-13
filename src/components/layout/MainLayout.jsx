@@ -290,6 +290,8 @@ export default function Dashboard({ children, title }) {
     }
   };
 
+  const showBreadcrumbs = location.pathname !== '/dashboard';
+
   return (
     <ThemeProvider theme={theme}>
       {/* Main layout structure */}
@@ -494,40 +496,53 @@ export default function Dashboard({ children, title }) {
             sx={{ mt: 0, ml: 0, mb: 4, pr: 0, mr: 0 }}
           >
             {/* Dynamic breadcrumb navigation */}
-            <Breadcrumbs
-              aria-label="breadcrumb"
-              sx={{ mb: 1 }}
-            >
-              <Link
-                component={RouterLink}
-                color="inherit"
-                to="/dashboard"
+            {showBreadcrumbs && (
+              <Breadcrumbs
+                aria-label="breadcrumb"
+                sx={{ mb: 1 }}
               >
-                Home
-              </Link>
-              {pathnames.map((value, index) => {
-                const last = index === pathnames.length - 1;
-                const to = `/${pathnames.slice(0, index + 1).join('/')}`;
-
-                return last ? (
-                  <Typography
-                    color="text.primary"
-                    key={to}
-                  >
-                    {breadcrumbNameMap[to] || value}
-                  </Typography>
+                {isGuest ? (
+                  <Typography color="text.primary">Home</Typography>
                 ) : (
                   <Link
                     component={RouterLink}
                     color="inherit"
-                    to={to}
-                    key={to}
+                    to="/dashboard"
                   >
-                    {breadcrumbNameMap[to] || value}
+                    Home
                   </Link>
-                );
-              })}
-            </Breadcrumbs>
+                )}
+                {pathnames.map((value, index) => {
+                  const last = index === pathnames.length - 1;
+                  const to = `/${pathnames.slice(0, index + 1).join('/')}`;
+
+                  return last ? (
+                    <Typography
+                      color="text.primary"
+                      key={to}
+                    >
+                      {breadcrumbNameMap[to] || value}
+                    </Typography>
+                  ) : isGuest ? (
+                    <Typography
+                      color="text.primary"
+                      key={to}
+                    >
+                      {breadcrumbNameMap[to] || value}
+                    </Typography>
+                  ) : (
+                    <Link
+                      component={RouterLink}
+                      color="inherit"
+                      to={to}
+                      key={to}
+                    >
+                      {breadcrumbNameMap[to] || value}
+                    </Link>
+                  );
+                })}
+              </Breadcrumbs>
+            )}
             {/* Render child components */}
             <Grid container>{children}</Grid>
           </Container>

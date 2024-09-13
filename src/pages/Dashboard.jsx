@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import MainLayout from '../components/layout/MainLayout';
 import {
   Container,
@@ -89,13 +89,27 @@ const waterConsumptionData = [
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
-// Add StatCard component
 const StatCard = ({ title, value, icon, color }) => (
   <Paper
     elevation={3}
-    sx={{ p: 2, display: 'flex', alignItems: 'center', height: '100%' }}
+    sx={{ p: 2, display: 'flex', alignItems: 'center' }}
   >
-    <Box sx={{ mr: 2, bgcolor: `${color}.light`, p: 1, borderRadius: 1 }}>{icon}</Box>
+    <Box
+      sx={{
+        mr: 2,
+        bgcolor: `${color}.light`,
+        borderRadius: 1,
+        width: 56,
+        height: 56,
+        minWidth: 56,
+        minHeight: 56,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}
+    >
+      {React.cloneElement(icon, { sx: { fontSize: 32, color: `${color}.main` } })}
+    </Box>
     <Box>
       <Typography
         variant="h6"
@@ -210,9 +224,10 @@ export default function Dashboard() {
           {/* StatCards */}
           <Grid
             item
-            xs={12}
-            sm={6}
-            md={3}
+            sm={12}
+            md={6}
+            lg={3}
+            width={'100%'}
           >
             <StatCard
               title="Total Eggs"
@@ -223,9 +238,10 @@ export default function Dashboard() {
           </Grid>
           <Grid
             item
-            xs={12}
-            sm={6}
-            md={3}
+            sm={12}
+            md={6}
+            lg={3}
+            width={'100%'}
           >
             <StatCard
               title="Total Chickens"
@@ -236,9 +252,10 @@ export default function Dashboard() {
           </Grid>
           <Grid
             item
-            xs={12}
-            sm={6}
-            md={3}
+            sm={12}
+            md={6}
+            lg={3}
+            width={'100%'}
           >
             <StatCard
               title="Avg. Water (L)"
@@ -249,9 +266,10 @@ export default function Dashboard() {
           </Grid>
           <Grid
             item
-            xs={12}
-            sm={6}
-            md={3}
+            sm={12}
+            md={6}
+            lg={3}
+            width={'100%'}
           >
             <StatCard
               title="Avg. Temp (°C)"
@@ -267,6 +285,7 @@ export default function Dashboard() {
             xs={12}
             sm={6}
             md={4}
+            width={'100%'}
           >
             <Paper
               sx={{
@@ -307,6 +326,7 @@ export default function Dashboard() {
             xs={12}
             sm={6}
             md={4}
+            width={'100%'}
           >
             <Paper
               sx={{
@@ -346,6 +366,7 @@ export default function Dashboard() {
             xs={12}
             sm={6}
             md={4}
+            width={'100%'}
           >
             <Paper
               sx={{
@@ -385,6 +406,7 @@ export default function Dashboard() {
             xs={12}
             sm={6}
             md={4}
+            width={'100%'}
           >
             <Paper
               sx={{
@@ -424,6 +446,7 @@ export default function Dashboard() {
             xs={12}
             sm={6}
             md={4}
+            width={'100%'}
           >
             <Paper
               sx={{
@@ -464,6 +487,7 @@ export default function Dashboard() {
             xs={12}
             sm={6}
             md={4}
+            width={'100%'}
           >
             <Paper
               sx={{

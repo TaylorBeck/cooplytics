@@ -256,7 +256,7 @@ export default function OrdersPage() {
 
   return (
     <MainLayout>
-      <Box sx={{ width: '100%', p: 3 }}>
+      <Box sx={{ width: '100%', p: 0 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
           <Typography
             variant="h4"

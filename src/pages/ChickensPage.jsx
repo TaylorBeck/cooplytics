@@ -412,7 +412,9 @@ export default function Chickens() {
               <TableBody>
                 {paginatedChickens.map(chicken => (
                   <TableRow
-                    key={`${chicken.id}-${chicken.name}`}
+                    key={`${chicken.id}-${chicken.name}-${chicken.popularity}-${
+                      chicken.type
+                    }-${Math.random()}`}
                     onClick={() => handleChickenClick(chicken.farmId, chicken.id)}
                     sx={{
                       cursor: 'pointer',

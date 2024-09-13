@@ -167,7 +167,7 @@ export default function FinancesPage() {
 
   return (
     <MainLayout>
-      <Box sx={{ flexGrow: 1, p: 3 }}>
+      <Box sx={{ flexGrow: 1, px: 0, py: 0, mt: 0 }}>
         <Typography
           variant="h4"
           gutterBottom

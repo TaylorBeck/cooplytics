@@ -8,8 +8,11 @@ import SecurityForm from '../components/settings/SecurityForm';
 export default function SettingsPage() {
   return (
     <MainLayout>
-      <Container maxWidth="md">
-        <Box sx={{ my: 4 }}>
+      <Container
+        maxWidth="md"
+        sx={{ pl: 0, mx: 0 }}
+      >
+        <Box sx={{ my: 3 }}>
           <Typography
             variant="h4"
             component="h1"
