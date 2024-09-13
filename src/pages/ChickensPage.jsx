@@ -34,6 +34,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { useChickens } from '../hooks/useChickens';
 import { useNavigate, useParams } from 'react-router-dom';
 import { addChicken, updateChicken } from '../api/chickenApi';
+import ChickenModal from '../components/ChickenModal';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -196,23 +197,19 @@ export default function Chickens() {
     setIsModalOpen(true);
   };
 
-  const handleSaveChicken = async () => {
+  const handleSaveChicken = async chickenData => {
     try {
-      const chickenData = editingChicken ? editingChicken : newChicken;
       const farmId = chickenData.farmId;
 
       if (editingChicken) {
-        // Update existing chicken
-        await updateChicken(farmId, chickenData.id, chickenData);
+        await updateChicken(farmId, editingChicken.id, chickenData);
         setSnackbar({
           open: true,
           message: 'Chicken updated successfully',
           severity: 'success'
         });
       } else {
-        // Add new chicken
         await addChicken(farmId, chickenData, user);
-
         setSnackbar({
           open: true,
           message: 'Chicken added successfully',
@@ -222,16 +219,6 @@ export default function Chickens() {
 
       setIsModalOpen(false);
       setEditingChicken(null);
-      setNewChicken({
-        identifier: '',
-        currentWeight: '',
-        currentHeight: '',
-        name: '',
-        type: '',
-        location: '',
-        eggColor: '',
-        dateHatched: ''
-      });
       // Refresh chickens data
       await fetchChickens();
     } catch (error) {
@@ -475,122 +462,16 @@ export default function Chickens() {
         </Grid>
       </Grid>
 
-      {/* Modal for adding/editing chickens */}
-      <Modal
+      {/* Replace the existing Modal with ChickenModal */}
+      <ChickenModal
         open={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
           setEditingChicken(null);
         }}
-        aria-labelledby="chicken-modal"
-      >
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 400,
-            bgcolor: 'background.paper',
-            boxShadow: 24,
-            p: 4
-          }}
-        >
-          <Typography
-            variant="h6"
-            component="h2"
-            gutterBottom
-          >
-            {editingChicken ? 'Edit Chicken' : 'Add New Chicken'}
-          </Typography>
-          <TextField
-            fullWidth
-            margin="normal"
-            name="identifier"
-            label="Unique Identifier"
-            value={editingChicken ? editingChicken.identifier : newChicken.identifier}
-            onChange={handleInputChange}
-          />
-          <TextField
-            fullWidth
-            margin="normal"
-            name="currentWeight"
-            label="Weight"
-            type="number"
-            value={
-              editingChicken ? editingChicken.currentWeight : newChicken.currentWeight
-            }
-            onChange={handleInputChange}
-          />
-          <TextField
-            fullWidth
-            margin="normal"
-            name="currentHeight"
-            label="Height"
-            type="number"
-            value={
-              editingChicken ? editingChicken.currentHeight : newChicken.currentHeight
-            }
-            onChange={handleInputChange}
-          />
-          <TextField
-            fullWidth
-            margin="normal"
-            name="name"
-            label="Name"
-            value={editingChicken ? editingChicken.name : newChicken.name}
-            onChange={handleInputChange}
-          />
-          <FormControl
-            fullWidth
-            margin="normal"
-          >
-            <InputLabel>Breed</InputLabel>
-            <Select
-              name="type"
-              value={editingChicken ? editingChicken.type : newChicken.type}
-              onChange={handleInputChange}
-            >
-              <MenuItem value="Broiler">Broiler</MenuItem>
-              <MenuItem value="Layer">Layer</MenuItem>
-              <MenuItem value="Dual-purpose">Dual-purpose</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            fullWidth
-            margin="normal"
-            name="location"
-            label="Location"
-            value={editingChicken ? editingChicken.location : newChicken.location}
-            onChange={handleInputChange}
-          />
-          <TextField
-            fullWidth
-            margin="normal"
-            name="eggColor"
-            label="Egg Color"
-            value={editingChicken ? editingChicken.eggColor : newChicken.eggColor}
-            onChange={handleInputChange}
-          />
-          <TextField
-            fullWidth
-            margin="normal"
-            name="dateHatched"
-            label="Date Hatched"
-            type="date"
-            InputLabelProps={{ shrink: true }}
-            value={editingChicken ? editingChicken.dateHatched : newChicken.dateHatched}
-            onChange={handleInputChange}
-          />
-          <Button
-            variant="contained"
-            onClick={handleSaveChicken}
-            sx={{ mt: 2 }}
-          >
-            {editingChicken ? 'Save Changes' : 'Add Chicken'}
-          </Button>
-        </Box>
-      </Modal>
+        onSave={handleSaveChicken}
+        chicken={editingChicken}
+      />
 
       {/* Snackbar for displaying success/error messages */}
       <Snackbar

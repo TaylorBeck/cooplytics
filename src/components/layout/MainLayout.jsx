@@ -496,7 +496,7 @@ export default function Dashboard({ children, title }) {
             {/* Dynamic breadcrumb navigation */}
             <Breadcrumbs
               aria-label="breadcrumb"
-              sx={{ mb: 2 }}
+              sx={{ mb: 1 }}
             >
               <Link
                 component={RouterLink}

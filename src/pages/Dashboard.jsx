@@ -201,7 +201,7 @@ export default function Dashboard() {
     <MainLayout>
       <Container
         maxWidth="lg"
-        sx={{ mt: 4, mb: 4 }}
+        sx={{ mt: 1, mb: 4 }}
       >
         <Grid
           container

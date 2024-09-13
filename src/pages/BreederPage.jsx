@@ -161,7 +161,7 @@ export default function BreederPage() {
 
   return (
     <MainLayout>
-      <Box sx={{ flexGrow: 1, p: 3 }}>
+      <Box sx={{ flexGrow: 1, px: 3, py: 1 }}>
         <Typography
           variant="h4"
           gutterBottom

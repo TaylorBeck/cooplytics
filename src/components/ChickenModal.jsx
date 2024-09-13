@@ -10,6 +10,13 @@ import {
   MenuItem,
   Button
 } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import dayjs from 'dayjs';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 const initialChickenState = {
   identifier: '',
@@ -18,7 +25,7 @@ const initialChickenState = {
   name: '',
   type: '',
   location: '',
-  eggColor: '',
+  eggColor: 'White',
   dateHatched: ''
 };
 
@@ -35,6 +42,13 @@ export default function ChickenModal({ open, onClose, onSave, chicken }) {
 
   const handleInputChange = e => {
     setChickenData({ ...chickenData, [e.target.name]: e.target.value });
+  };
+
+  const handleDateChange = date => {
+    setChickenData({
+      ...chickenData,
+      dateHatched: date ? date.format('YYYY-MM-DD') : null
+    });
   };
 
   const handleSave = () => {
@@ -77,7 +91,7 @@ export default function ChickenModal({ open, onClose, onSave, chicken }) {
           fullWidth
           margin="normal"
           name="currentWeight"
-          label="Weight"
+          label="Weight (lbs)"
           type="number"
           value={chickenData.currentWeight}
           onChange={handleInputChange}
@@ -102,12 +116,14 @@ export default function ChickenModal({ open, onClose, onSave, chicken }) {
         <FormControl
           fullWidth
           margin="normal"
+          variant="outlined"
         >
           <InputLabel>Breed</InputLabel>
           <Select
             name="type"
             value={chickenData.type}
             onChange={handleInputChange}
+            label="Breed"
           >
             <MenuItem value="Broiler">Broiler</MenuItem>
             <MenuItem value="Layer">Layer</MenuItem>
@@ -122,31 +138,62 @@ export default function ChickenModal({ open, onClose, onSave, chicken }) {
           value={chickenData.location}
           onChange={handleInputChange}
         />
-        <TextField
+        <FormControl
           fullWidth
           margin="normal"
-          name="eggColor"
-          label="Egg Color"
-          value={chickenData.eggColor}
-          onChange={handleInputChange}
-        />
-        <TextField
-          fullWidth
-          margin="normal"
-          name="dateHatched"
-          label="Date Hatched"
-          type="date"
-          InputLabelProps={{ shrink: true }}
-          value={chickenData.dateHatched}
-          onChange={handleInputChange}
-        />
-        <Button
-          variant="contained"
-          onClick={handleSave}
-          sx={{ mt: 2 }}
         >
-          {chicken ? 'Save Changes' : 'Add Chicken'}
-        </Button>
+          <Typography
+            variant="body1"
+            component="label"
+            gutterBottom
+          >
+            Egg Color
+          </Typography>
+          <RadioGroup
+            row
+            name="eggColor"
+            value={chickenData.eggColor}
+            onChange={handleInputChange}
+          >
+            <FormControlLabel
+              value="White"
+              control={<Radio />}
+              label="White"
+            />
+            <FormControlLabel
+              value="Brown"
+              control={<Radio />}
+              label="Brown"
+            />
+            <FormControlLabel
+              value="Other"
+              control={<Radio />}
+              label="Other"
+            />
+          </RadioGroup>
+        </FormControl>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DatePicker
+            label="Date Hatched"
+            value={chickenData.dateHatched ? dayjs(chickenData.dateHatched) : null}
+            onChange={handleDateChange}
+            slotProps={{
+              textField: {
+                fullWidth: true,
+                margin: 'normal'
+              }
+            }}
+          />
+        </LocalizationProvider>
+
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+          <Button
+            variant="contained"
+            onClick={handleSave}
+          >
+            {chicken ? 'Save Changes' : 'Add Chicken'}
+          </Button>
+        </Box>
       </Box>
     </Modal>
   );

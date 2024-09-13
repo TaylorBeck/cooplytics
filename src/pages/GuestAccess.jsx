@@ -37,6 +37,14 @@ export default function GuestAccess() {
     authenticateGuestUser();
   }, [guestToken, navigate, dispatch]);
 
-  // Display a loading message while authentication is in progress
-  return <div>Authenticating guest access...</div>;
+  return (
+    <div className="flex justify-center items-center h-screen bg-gray-100">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">
+          Authenticating guest access...
+        </h2>
+        <p className="text-gray-600">Please wait while we verify your access.</p>
+      </div>
+    </div>
+  );
 }
